@@ -2,7 +2,7 @@
   <a-layout-footer class="global-footer">
     <div class="footer-content">
       <div class="footer-text">
-        <span class="copyright">© 2025 Draw2Draw. All rights reserved.</span>
+        <span class="copyright">© 2025 ZeroCode. All rights reserved.</span>
         <span class="divider">|</span>
         <span
           >Powered by

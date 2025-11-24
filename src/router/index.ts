@@ -1,3 +1,4 @@
+import ACCESS_ENUM from '@/access/accessEnum'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -8,7 +9,31 @@ const router = createRouter({
       name: 'home',
       component: () => import("@/pages/HomePage.vue"),
     },
+    {
+      path: '/user/login',
+      name: '用户登录',
+      component: () => import("@/pages/user/UserLoginPage.vue"),
+    },
+    {
+      path: '/user/register',
+      name: '用户注册',
+      component: () => import("@/pages/user/UserRegisterPage.vue"),
+    },
+    {
+      path: '/admin/userManage',
+      name: '用户管理',
+      component: () => import("@/pages/admin/UserManagePage.vue"),
+      meta: {
+        access: ACCESS_ENUM.ADMIN,
+      }
+    },
+    {
+      path: '/user/profile',
+      name: '个人中心',
+      component: () => import("@/pages/user/UserProfilePage.vue"),
+    },
   ],
+
 })
 
 export default router

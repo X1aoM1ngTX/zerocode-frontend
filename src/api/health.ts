@@ -1,7 +1,7 @@
 import request from '@/request'
 
 /** 健康检查 检查服务是否正常运行 GET /health/ */
-export async function healthCheck(options?: { [key: string]: any }) {
+export async function healthCheck(options?: Record<string, unknown>) {
   return request<API.BaseResponseString>('/health/', {
     method: 'GET',
     ...(options || {}),

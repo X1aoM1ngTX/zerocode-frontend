@@ -16,7 +16,7 @@
         <a-menu
           v-model:selectedKeys="current"
           mode="horizontal"
-          :items="menus"
+          :items="filteredMenus"
           @click="doMenuClick"
           class="nav-menu"
         />
@@ -24,41 +24,38 @@
 
       <!-- 用户区域 -->
       <a-col flex="220px" class="user-col">
-        <div
-          class="user-info"
-        >
+        <div v-if="loginUserStore.loginUser.id" class="user-info">
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
               <a-avatar
                 :size="32"
+                :src="loginUserStore.loginUser.userAvatar"
                 class="user-avatar"
               >
                 <template #icon>
                   <UserOutlined />
                 </template>
               </a-avatar>
+              <span class="username">{{ loginUserStore.loginUser.userName || '用户' }}</span>
               <DownOutlined />
             </a>
             <template #overlay>
               <a-menu>
-                <a-menu-item key="1" @click="toProfile">
-                  <UserOutlined />
-                  个人中心
-                </a-menu-item>
                 <a-menu-item
-                  key="2"
-                  @click="toUserManage"
+                  v-for="item in dropdownMenuItems"
+                  :key="item.key"
+                  @click="item.action"
                 >
-                  <TeamOutlined />
-                  用户管理
-                </a-menu-item>
-                <a-menu-item key="6">
-                  <LogoutOutlined />
-                  退出登录
+                  <component :is="item.icon" />
+                  {{ item.label }}
                 </a-menu-item>
               </a-menu>
             </template>
           </a-dropdown>
+        </div>
+        <div v-else class="auth-buttons">
+          <a-button type="link" class="login-btn" @click="toLogin">登录</a-button>
+          <a-button type="primary" class="register-btn" @click="toRegister">注册</a-button>
         </div>
       </a-col>
     </a-row>
@@ -66,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from "vue";
+import { h, ref, computed } from "vue";
 import {
   HomeOutlined,
   UserOutlined,
@@ -75,6 +72,13 @@ import {
   TeamOutlined,
 } from "@ant-design/icons-vue";
 import router from "@/router";
+import { useLoginUserStore } from "@/stores/loginUser";
+import { userLogout } from "@/api/user";
+import { message } from "ant-design-vue";
+import checkAccess from "@/access/checkAccess";
+import ACCESS_ENUM from "@/access/accessEnum";
+
+const loginUserStore = useLoginUserStore();
 
 // 原始菜单项
 const menus = ref([
@@ -84,14 +88,78 @@ const menus = ref([
     label: "欢迎",
     title: "欢迎",
   },
-  {
-    key: "/userManage",
-    icon: () => h(TeamOutlined),
-    label: "用户管理",
-    title: "用户管理",
-  }
+  // 未来可以在这里添加更多顶部菜单项
+  // {
+  //   key: "/some-feature",
+  //   icon: () => h(SomeIcon),
+  //   label: "某功能",
+  //   title: "某功能",
+  // },
 ]);
 
+// 定义菜单项类型
+interface MenuItem {
+  key: string;
+  icon: () => unknown;
+  label: string;
+  title: string;
+}
+
+// 过滤菜单项的通用函数
+const filterMenusByPermission = (menuItems: MenuItem[]) => {
+  return menuItems.filter((menu) => {
+    // 根据菜单key找到对应的路由
+    const route = router.resolve(menu.key);
+
+    // 如果路由配置了hideInMenu，则隐藏该菜单
+    if (route.meta?.hideInMenu) {
+      return false;
+    }
+
+    // 根据权限过滤菜单，有权限则返回true，保留该菜单
+    return checkAccess(loginUserStore.loginUser, route.meta?.access as string);
+  });
+};
+
+// 过滤后的顶部导航菜单项
+const filteredMenus = computed(() => {
+  return filterMenusByPermission(menus.value);
+});
+
+// 下拉菜单项配置
+const dropdownMenuItems = computed(() => {
+  const items = [
+    {
+      key: "profile",
+      icon: UserOutlined,
+      label: "个人中心",
+      action: toProfile,
+      // 个人中心需要用户登录权限
+      access: ACCESS_ENUM.USER
+    },
+    {
+      key: "userManage",
+      icon: TeamOutlined,
+      label: "用户管理",
+      action: toUserManage,
+      // 用户管理需要管理员权限
+      access: ACCESS_ENUM.ADMIN
+    },
+    {
+      key: "logout",
+      icon: LogoutOutlined,
+      label: "退出登录",
+      action: handleLogout,
+      // 退出登录不需要特殊权限
+      access: ACCESS_ENUM.NOT_LOGIN
+    }
+  ];
+
+  // 过滤有权限的菜单项
+  return items.filter(item =>
+    checkAccess(loginUserStore.loginUser, item.access)
+  );
+});
 
 // 当前选中的菜单
 const current = ref<string[]>([]);
@@ -118,19 +186,30 @@ const toUserManage = () => {
   router.push("/admin/userManage");
 };
 
+// 登录
+const toLogin = () => {
+  router.push("/user/login");
+};
+
+// 注册
+const toRegister = () => {
+  router.push("/user/register");
+};
+
 // 退出登录
-// const handleLogout = async () => {
-//   const res = await userLogoutUsingPost();
-//   if (res.data.code === 0) {
-//     loginUserStore.setLoginUser({
-//       userName: "未登录",
-//     });
-//     message.success("退出登录成功");
-//     await router.replace("/user/login");
-//   } else {
-//     message.error("退出登录失败，" + res.data.message);
-//   }
-// };
+const handleLogout = async () => {
+  const res = await userLogout();
+  if (res.data.code === 0) {
+    loginUserStore.setLoginUser({
+      userName: "未登录",
+    });
+    localStorage.removeItem("login-user");
+    message.success("退出登录成功");
+    await router.replace("/user/login");
+  } else {
+    message.error("退出登录失败，" + (res.data.message || "未知错误"));
+  }
+};
 </script>
 
 <style scoped>
