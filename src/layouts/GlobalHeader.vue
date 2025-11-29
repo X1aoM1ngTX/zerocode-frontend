@@ -70,6 +70,7 @@ import {
   DownOutlined,
   LogoutOutlined,
   TeamOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons-vue";
 import router from "@/router";
 import { useLoginUserStore } from "@/stores/loginUser";
@@ -138,6 +139,14 @@ const dropdownMenuItems = computed(() => {
       access: ACCESS_ENUM.USER
     },
     {
+      key: "appManage",
+      icon: AppstoreOutlined,
+      label: "应用管理",
+      action: toAppManage,
+      // 应用管理需要管理员权限
+      access: ACCESS_ENUM.ADMIN
+    },
+    {
       key: "userManage",
       icon: TeamOutlined,
       label: "用户管理",
@@ -179,6 +188,11 @@ router.afterEach((to) => {
 // 个人中心
 const toProfile = () => {
   router.push("/user/profile");
+};
+
+// 应用管理
+const toAppManage = () => {
+  router.push("/admin/appManage");
 };
 
 // 用户管理

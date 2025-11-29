@@ -28,9 +28,27 @@ const router = createRouter({
       }
     },
     {
+      path: '/admin/appManage',
+      name: '应用管理',
+      component: () => import("@/pages/admin/AppManagePage.vue"),
+      meta: {
+        access: ACCESS_ENUM.ADMIN,
+      }
+    },
+    {
       path: '/user/profile',
       name: '个人中心',
       component: () => import("@/pages/user/UserProfilePage.vue"),
+    },
+    {
+      path: '/app/chat/:id',
+      name: '应用对话',
+      component: () => import("@/pages/app/AppChatPage.vue"),
+    },
+    {
+      path: '/app/edit/:id',
+      name: '编辑应用',
+      component: () => import("@/pages/app/AppEditPage.vue"),
     },
   ],
 

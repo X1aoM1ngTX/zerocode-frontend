@@ -34,7 +34,6 @@ import GlobalFooter from "./GlobalFooter.vue";
 }
 
 .content-full-width {
-  padding: 20px;
   background: #ffffff;
   margin-left: 0;
   margin-top: 64px;
