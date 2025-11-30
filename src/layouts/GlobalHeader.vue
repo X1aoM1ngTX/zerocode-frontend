@@ -155,6 +155,14 @@ const dropdownMenuItems = computed(() => {
       access: ACCESS_ENUM.ADMIN
     },
     {
+      key: "chatHistoryManage",
+      icon: TeamOutlined,
+      label: "对话管理",
+      action: toChatHistoryManage,
+      // 用户管理需要管理员权限
+      access: ACCESS_ENUM.ADMIN
+    },
+    {
       key: "logout",
       icon: LogoutOutlined,
       label: "退出登录",
@@ -198,6 +206,11 @@ const toAppManage = () => {
 // 用户管理
 const toUserManage = () => {
   router.push("/admin/userManage");
+};
+
+// 用户管理
+const toChatHistoryManage = () => {
+  router.push("/admin/chatManage");
 };
 
 // 登录

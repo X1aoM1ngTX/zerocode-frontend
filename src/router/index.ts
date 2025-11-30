@@ -36,6 +36,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/admin/chatManage',
+      name: '对话管理',
+      component: () => import("@/pages/admin/ChatManagePage.vue"),
+      meta: {
+        access: ACCESS_ENUM.ADMIN,
+      }
+    },
+    {
       path: '/user/profile',
       name: '个人中心',
       component: () => import("@/pages/user/UserProfilePage.vue"),
