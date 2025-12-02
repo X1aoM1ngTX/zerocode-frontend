@@ -500,7 +500,9 @@ const updatePreview = () => {
   if (appId.value) {
     const codeGenType = appInfo.value?.codeGenType || CodeGenTypeEnum.HTML
     const newPreviewUrl = getStaticPreviewUrl(codeGenType, appId.value)
-    previewUrl.value = newPreviewUrl
+    // 添加时间戳确保iframe刷新
+    const timestamp = new Date().getTime()
+    previewUrl.value = `${newPreviewUrl}?t=${timestamp}`
     previewReady.value = true
   }
 }
@@ -557,6 +559,11 @@ const openDeployedSite = () => {
 // iframe加载完成
 const onIframeLoad = () => {
   previewReady.value = true
+  // 移除URL中的时间戳参数，保持URL整洁
+  if (previewUrl.value.includes('?t=')) {
+    const baseUrl = previewUrl.value.split('?t=')[0]
+    previewUrl.value = baseUrl
+  }
 }
 
 // 编辑应用
