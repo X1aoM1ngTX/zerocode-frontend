@@ -4,6 +4,9 @@
     <div class="header-bar">
       <div class="header-left">
         <h1 class="app-name">{{ appInfo?.appName || '网站生成器' }}</h1>
+        <a-tag v-if="appInfo?.codeGenType" color="blue" class="code-gen-type-tag">
+        {{ formatCodeGenType(appInfo.codeGenType) }}
+        </a-tag>
       </div>
       <div class="header-right">
         <a-button type="default" @click="showAppDetail">
@@ -12,7 +15,20 @@
           </template>
           应用详情
         </a-button>
+        <a-tooltip v-if="!isDeployed" title="请先部署应用后再下载代码">
+          <a-button
+            type="primary"
+            ghost
+            @click="downloadCode"
+            :loading="downloading"
+            :disabled="!isOwner || !isDeployed"
+          >
+            <DownloadOutlined />
+            下载代码
+          </a-button>
+        </a-tooltip>
         <a-button
+          v-else
           type="primary"
           ghost
           @click="downloadCode"
@@ -162,7 +178,7 @@ import { DownloadOutlined } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
 import { getAppVoById, deployApp as deployAppApi, deleteApp as deleteAppApi } from '@/api/app'
 import { listAppChatHistory } from '@/api/chatHistory'
-import { CodeGenTypeEnum } from '@/utils/codeGenTypes'
+import { CodeGenTypeEnum, formatCodeGenType } from '@/utils/codeGenTypes'
 import request from '@/request'
 
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
@@ -221,6 +237,10 @@ const isOwner = computed(() => {
 
 const isAdmin = computed(() => {
   return loginUserStore.loginUser.userRole === 'admin'
+})
+
+const isDeployed = computed(() => {
+  return !!(appInfo.value?.deployKey && appInfo.value?.deployedTime)
 })
 
 // 应用详情相关
@@ -574,6 +594,13 @@ const downloadCode = async () => {
     message.error('应用ID不存在')
     return
   }
+
+  // 检查应用是否已部署
+  if (!isDeployed.value) {
+    message.error('请先部署应用后再下载代码')
+    return
+  }
+
   downloading.value = true
   try {
     const API_BASE_URL = request.defaults.baseURL || ''
@@ -583,7 +610,13 @@ const downloadCode = async () => {
       credentials: 'include',
     })
     if (!response.ok) {
-      throw new Error(`下载失败: ${response.status}`)
+      const errorText = await response.text()
+      if (errorText.includes('应用未部署')) {
+        message.error('请先部署应用后再下载代码')
+      } else {
+        throw new Error(`下载失败: ${response.status}`)
+      }
+      return
     }
     // 获取文件名
     const contentDisposition = response.headers.get('Content-Disposition')
@@ -645,6 +678,10 @@ onUnmounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
+}
+
+.code-gen-type-tag {
+  font-size: 12px;
 }
 
 .header-right {
