@@ -15,34 +15,23 @@
           </template>
           应用详情
         </a-button>
-        <a-tooltip v-if="!isDeployed" title="请先部署应用后再下载代码">
-          <a-button
-            type="primary"
-            ghost
-            @click="downloadCode"
-            :loading="downloading"
-            :disabled="!isOwner || !isDeployed"
-          >
-            <DownloadOutlined />
-            下载代码
-          </a-button>
-        </a-tooltip>
         <a-button
-          v-else
           type="primary"
           ghost
           @click="downloadCode"
           :loading="downloading"
           :disabled="!isOwner"
         >
-          <DownloadOutlined />
+          <template #icon>
+            <DownloadOutlined />
+          </template>
           下载代码
         </a-button>
         <a-button type="primary" @click="deployApp" :loading="deploying">
           <template #icon>
             <CloudUploadOutlined />
           </template>
-          部署应用
+          部署
         </a-button>
       </div>
     </div>
@@ -124,13 +113,13 @@
           <div class="input-wrapper">
             <a-tooltip v-if="!isOwner" title="无法在别人的作品下对话哦~" placement="top">
               <a-textarea
-                  v-model:value="userInput"
-                  :placeholder="getInputPlaceholder()"
-                  :rows="4"
-                  :maxlength="1000"
-                  @keydown.enter.prevent="sendMessage"
-                  :disabled="isGenerating || !isOwner"
-                />
+                v-model:value="userInput"
+                :placeholder="getInputPlaceholder()"
+                :rows="4"
+                :maxlength="1000"
+                @keydown.enter.prevent="sendMessage"
+                :disabled="isGenerating || !isOwner"
+              />
             </a-tooltip>
             <a-textarea
               v-else
@@ -156,7 +145,6 @@
           </div>
         </div>
       </div>
-
       <!-- 右侧网页展示区域 -->
       <div class="preview-section">
         <div class="preview-header">
@@ -226,15 +214,19 @@ import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
-import { getAppVoById, deployApp as deployAppApi, deleteApp as deleteAppApi } from '@/api/app'
-import { listAppChatHistory } from '@/api/chatHistory'
+import {
+  getAppVoById,
+  deployApp as deployAppApi,
+  deleteApp as deleteAppApi,
+} from '@/api/appController'
+import { listAppChatHistory } from '@/api/chatHistoryController'
 import { CodeGenTypeEnum, formatCodeGenType } from '@/utils/codeGenTypes'
 import request from '@/request'
 
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 import AppDetailModal from '@/components/AppDetailModal.vue'
 import DeploySuccessModal from '@/components/DeploySuccessModal.vue'
-import aiAvatar from '@/assets/game9-blue.png'
+import aiAvatar from '@/assets/aiAvatar.png'
 import { API_BASE_URL, getStaticPreviewUrl } from '@/config/env'
 import { VisualEditor, type ElementInfo } from '@/utils/visualEditor'
 
@@ -253,7 +245,7 @@ const loginUserStore = useLoginUserStore()
 
 // 应用信息
 const appInfo = ref<API.AppVO>()
-const appId = ref<string>()
+const appId = ref<any>()
 
 // 对话相关
 interface Message {
@@ -302,10 +294,6 @@ const isOwner = computed(() => {
 
 const isAdmin = computed(() => {
   return loginUserStore.loginUser.userRole === 'admin'
-})
-
-const isDeployed = computed(() => {
-  return !!(appInfo.value?.deployKey && appInfo.value?.deployedTime)
 })
 
 // 应用详情相关
@@ -385,6 +373,7 @@ const fetchAppInfo = async () => {
     const res = await getAppVoById({ id: id as unknown as number })
     if (res.data.code === 0 && res.data.data) {
       appInfo.value = res.data.data
+
       // 先加载对话历史
       await loadChatHistory()
       // 如果有至少2条对话记录，展示对应的网站
@@ -584,9 +573,7 @@ const updatePreview = () => {
   if (appId.value) {
     const codeGenType = appInfo.value?.codeGenType || CodeGenTypeEnum.HTML
     const newPreviewUrl = getStaticPreviewUrl(codeGenType, appId.value)
-    // 添加时间戳确保iframe刷新
-    const timestamp = new Date().getTime()
-    previewUrl.value = `${newPreviewUrl}?t=${timestamp}`
+    previewUrl.value = newPreviewUrl
     previewReady.value = true
   }
 }
@@ -595,6 +582,44 @@ const updatePreview = () => {
 const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  }
+}
+
+// 下载代码
+const downloadCode = async () => {
+  if (!appId.value) {
+    message.error('应用ID不存在')
+    return
+  }
+  downloading.value = true
+  try {
+    const API_BASE_URL = request.defaults.baseURL || ''
+    const url = `${API_BASE_URL}/app/download/${appId.value}`
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      throw new Error(`下载失败: ${response.status}`)
+    }
+    // 获取文件名
+    const contentDisposition = response.headers.get('Content-Disposition')
+    const fileName = contentDisposition?.match(/filename="(.+)"/)?.[1] || `app-${appId.value}.zip`
+    // 下载文件
+    const blob = await response.blob()
+    const downloadUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName
+    link.click()
+    // 清理
+    URL.revokeObjectURL(downloadUrl)
+    message.success('代码下载成功')
+  } catch (error) {
+    console.error('下载失败：', error)
+    message.error('下载失败，请重试')
+  } finally {
+    downloading.value = false
   }
 }
 
@@ -643,12 +668,6 @@ const openDeployedSite = () => {
 // iframe加载完成
 const onIframeLoad = () => {
   previewReady.value = true
-  // 移除URL中的时间戳参数，保持URL整洁
-  if (previewUrl.value.includes('?t=')) {
-    const baseUrl = previewUrl.value.split('?t=')[0]
-    previewUrl.value = baseUrl
-  }
-  // 初始化可视化编辑器
   const iframe = document.querySelector('.preview-iframe') as HTMLIFrameElement
   if (iframe) {
     visualEditor.init(iframe)
@@ -679,57 +698,6 @@ const deleteApp = async () => {
   } catch (error) {
     console.error('删除失败：', error)
     message.error('删除失败')
-  }
-}
-
-// 下载代码
-const downloadCode = async () => {
-  if (!appId.value) {
-    message.error('应用ID不存在')
-    return
-  }
-
-  // 检查应用是否已部署
-  if (!isDeployed.value) {
-    message.error('请先部署应用后再下载代码')
-    return
-  }
-
-  downloading.value = true
-  try {
-    const API_BASE_URL = request.defaults.baseURL || ''
-    const url = `${API_BASE_URL}/app/download/${appId.value}`
-    const response = await fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-    })
-    if (!response.ok) {
-      const errorText = await response.text()
-      if (errorText.includes('应用未部署')) {
-        message.error('请先部署应用后再下载代码')
-      } else {
-        throw new Error(`下载失败: ${response.status}`)
-      }
-      return
-    }
-    // 获取文件名
-    const contentDisposition = response.headers.get('Content-Disposition')
-    const fileName = contentDisposition?.match(/filename="(.+)"/)?.[1] || `app-${appId.value}.zip`
-    // 下载文件
-    const blob = await response.blob()
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    link.download = fileName
-    link.click()
-    // 清理
-    URL.revokeObjectURL(downloadUrl)
-    message.success('代码下载成功')
-  } catch (error) {
-    console.error('下载失败：', error)
-    message.error('下载失败，请重试')
-  } finally {
-    downloading.value = false
   }
 }
 
@@ -801,15 +769,15 @@ onUnmounted(() => {
   gap: 12px;
 }
 
+.code-gen-type-tag {
+  font-size: 12px;
+}
+
 .app-name {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-}
-
-.code-gen-type-tag {
-  font-size: 12px;
 }
 
 .header-right {
@@ -863,7 +831,7 @@ onUnmounted(() => {
 }
 
 .message-content {
-  max-width: 85%;
+  max-width: 70%;
   padding: 12px 16px;
   border-radius: 12px;
   line-height: 1.5;
