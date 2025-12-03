@@ -45,8 +45,8 @@
 import { reactive } from "vue";
 import { userLogin } from "@/api/user";
 import { message } from "ant-design-vue";
-import router from "@/router";
 import { useLoginUserStore } from "@/stores/loginUser";
+import { useRoute } from "vue-router";
 
 // 用于接受表单输入的值
 const formState = reactive<API.UserLoginRequest>({
@@ -55,6 +55,7 @@ const formState = reactive<API.UserLoginRequest>({
 });
 
 const loginUserStore = useLoginUserStore();
+const route = useRoute();
 
 /**
  * 提交表单
@@ -68,10 +69,13 @@ const handleSubmit = async (values: API.UserLoginRequest) => {
     // 保存到 localStorage 以实现页面刷新后保持登录状态
     localStorage.setItem("login-user", JSON.stringify(res.data.data));
     message.success("登录成功");
-    router.push({
-      path: "/",
-      replace: true,
-    });
+
+    // 获取重定向地址，如果有则跳转到重定向地址，否则跳转到主页
+    const redirect = route.query.redirect as string;
+    const targetUrl = redirect || "/";
+
+    // 使用 window.location.href 强制页面刷新
+    window.location.href = targetUrl;
   } else {
     message.error("登录失败，" + (res.data.message || "未知错误"));
   }
