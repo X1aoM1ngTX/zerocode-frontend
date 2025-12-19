@@ -185,7 +185,9 @@
         </div>
         <div class="preview-content">
           <div v-if="!previewUrl && !isGenerating" class="preview-placeholder">
-            <div class="placeholder-icon">🌐</div>
+            <div class="placeholder-icon">
+              <GlobalOutlined />
+            </div>
             <p>网站文件生成完成后将在这里展示</p>
           </div>
           <div v-else-if="isGenerating" class="preview-loading">
@@ -245,6 +247,7 @@ import {
   InfoCircleOutlined,
   DownloadOutlined,
   EditOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons-vue'
 
 const route = useRoute()
@@ -547,6 +550,29 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
       }, 1000)
     })
 
+    // 处理 business-error 事件（后端限流等错误）
+    eventSource.addEventListener('business-error', function (event: MessageEvent) {
+      if (streamCompleted) return
+
+      try {
+        const errorData = JSON.parse(event.data)
+        console.error('SSE业务错误事件:', errorData)
+
+        // 显示具体的错误信息
+        const errorMessage = errorData.message || '生成过程中出现错误'
+        messages.value[aiMessageIndex].content = `❌ ${errorMessage}`
+        messages.value[aiMessageIndex].loading = false
+        message.error(errorMessage)
+
+        streamCompleted = true
+        isGenerating.value = false
+        eventSource?.close()
+      } catch (parseError) {
+        console.error('解析错误事件失败:', parseError, '原始数据:', event.data)
+        handleError(new Error('服务器返回错误'), aiMessageIndex)
+      }
+    })
+
     // 处理错误
     eventSource.onerror = function () {
       if (streamCompleted || !isGenerating.value) return
@@ -595,6 +621,57 @@ const updatePreview = () => {
 const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+  }
+}
+
+// 下载代码
+const downloadCode = async () => {
+  if (!appId.value) {
+    message.error('应用ID不存在')
+    return
+  }
+
+  // 检查应用是否已部署
+  if (!isDeployed.value) {
+    message.error('请先部署应用后再下载代码')
+    return
+  }
+
+  downloading.value = true
+  try {
+    const API_BASE_URL = request.defaults.baseURL || ''
+    const url = `${API_BASE_URL}/app/download/${appId.value}`
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      const errorText = await response.text()
+      if (errorText.includes('应用未部署')) {
+        message.error('请先部署应用后再下载代码')
+      } else {
+        throw new Error(`下载失败: ${response.status}`)
+      }
+      return
+    }
+    // 获取文件名
+    const contentDisposition = response.headers.get('Content-Disposition')
+    const fileName = contentDisposition?.match(/filename="(.+)"/)?.[1] || `app-${appId.value}.zip`
+    // 下载文件
+    const blob = await response.blob()
+    const downloadUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = fileName
+    link.click()
+    // 清理
+    URL.revokeObjectURL(downloadUrl)
+    message.success('代码下载成功')
+  } catch (error) {
+    console.error('下载失败：', error)
+    message.error('下载失败，请重试')
+  } finally {
+    downloading.value = false
   }
 }
 
@@ -682,57 +759,6 @@ const deleteApp = async () => {
   }
 }
 
-// 下载代码
-const downloadCode = async () => {
-  if (!appId.value) {
-    message.error('应用ID不存在')
-    return
-  }
-
-  // 检查应用是否已部署
-  if (!isDeployed.value) {
-    message.error('请先部署应用后再下载代码')
-    return
-  }
-
-  downloading.value = true
-  try {
-    const API_BASE_URL = request.defaults.baseURL || ''
-    const url = `${API_BASE_URL}/app/download/${appId.value}`
-    const response = await fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-    })
-    if (!response.ok) {
-      const errorText = await response.text()
-      if (errorText.includes('应用未部署')) {
-        message.error('请先部署应用后再下载代码')
-      } else {
-        throw new Error(`下载失败: ${response.status}`)
-      }
-      return
-    }
-    // 获取文件名
-    const contentDisposition = response.headers.get('Content-Disposition')
-    const fileName = contentDisposition?.match(/filename="(.+)"/)?.[1] || `app-${appId.value}.zip`
-    // 下载文件
-    const blob = await response.blob()
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    link.download = fileName
-    link.click()
-    // 清理
-    URL.revokeObjectURL(downloadUrl)
-    message.success('代码下载成功')
-  } catch (error) {
-    console.error('下载失败：', error)
-    message.error('下载失败，请重试')
-  } finally {
-    downloading.value = false
-  }
-}
-
 // 可视化编辑相关函数
 const toggleEditMode = () => {
   // 检查 iframe 是否已经加载
@@ -801,15 +827,15 @@ onUnmounted(() => {
   gap: 12px;
 }
 
+.code-gen-type-tag {
+  font-size: 12px;
+}
+
 .app-name {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
-}
-
-.code-gen-type-tag {
-  font-size: 12px;
 }
 
 .header-right {
@@ -863,7 +889,7 @@ onUnmounted(() => {
 }
 
 .message-content {
-  max-width: 85%;
+  max-width: 95%;
   padding: 12px 16px;
   border-radius: 12px;
   line-height: 1.5;

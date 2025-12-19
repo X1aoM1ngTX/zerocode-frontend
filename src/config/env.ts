@@ -8,14 +8,24 @@ import { CodeGenTypeEnum } from "@/utils/codeGenTypes"
 export const DEPLOY_DOMAIN = import.meta.env.VITE_DEPLOY_DOMAIN || 'http://localhost'
 
 // API 基础地址
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8123/api'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 // 静态资源地址
 export const STATIC_BASE_URL = `${API_BASE_URL}/static`
 
 // 获取部署应用的完整URL
 export const getDeployUrl = (deployKey: string) => {
-  return `${DEPLOY_DOMAIN}:8080/${deployKey}`
+  // 如果 DEPLOY_DOMAIN 是完整 URL（以 http 开头），直接使用
+  if (DEPLOY_DOMAIN.startsWith('http')) {
+    return `${DEPLOY_DOMAIN}/${deployKey}`
+  }
+
+  // 如果是相对路径，使用当前域名构建完整 URL
+  const baseUrl = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'http://localhost'
+
+  return `${baseUrl}${DEPLOY_DOMAIN}/${deployKey}`
 }
 
 // 获取静态资源预览URL
