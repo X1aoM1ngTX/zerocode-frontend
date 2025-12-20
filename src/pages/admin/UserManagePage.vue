@@ -368,6 +368,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
+  margin-top: 24px;
 }
 
 .avatar-container {

@@ -3,7 +3,7 @@
     <div class="app-preview">
       <img v-if="app.cover" :src="app.cover" :alt="app.appName" />
       <div v-else class="app-placeholder">
-        <span>🤖</span>
+        <CodepenCircleOutlined style="color: #1870D5; font-size: 64px;" />
       </div>
       <div class="app-overlay">
         <a-space>
@@ -29,6 +29,7 @@
 </template>
 
 <script setup lang="ts">
+import { CodepenCircleOutlined } from '@ant-design/icons-vue'
 interface Props {
   app: API.AppVO
   featured?: boolean

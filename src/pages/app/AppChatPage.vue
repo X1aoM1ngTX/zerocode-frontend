@@ -854,7 +854,7 @@ onUnmounted(() => {
 
 /* 左侧对话区域 */
 .chat-section {
-  flex: 2;
+  flex: 3;
   display: flex;
   flex-direction: column;
   background: white;
@@ -947,7 +947,7 @@ onUnmounted(() => {
 
 /* 右侧预览区域 */
 .preview-section {
-  flex: 3;
+  flex: 4;
   display: flex;
   flex-direction: column;
   background: white;

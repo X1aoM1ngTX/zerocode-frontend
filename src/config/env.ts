@@ -31,8 +31,8 @@ export const getDeployUrl = (deployKey: string) => {
 // 获取静态资源预览URL
 export const getStaticPreviewUrl = (codeGenType: string, appId: string) => {
   const baseUrl = `${STATIC_BASE_URL}/${codeGenType}_${appId}/`
-  // 如果是 Vue 项目，浏览地址需要添加 dist 后缀
-  if (codeGenType === CodeGenTypeEnum.VUE_PROJECT) {
+  // Vue 和 React 项目都需要添加 dist/index.html 后缀
+  if (codeGenType === CodeGenTypeEnum.VUE_PROJECT || codeGenType === CodeGenTypeEnum.REACT_PROJECT) {
     return `${baseUrl}dist/index.html`
   }
   return baseUrl
