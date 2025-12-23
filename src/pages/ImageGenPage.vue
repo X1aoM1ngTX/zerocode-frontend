@@ -169,6 +169,7 @@ import { ref, reactive } from 'vue'
 import { message } from 'ant-design-vue'
 import { PictureOutlined, DownloadOutlined } from '@ant-design/icons-vue'
 import { generateImage } from '@/api/image'
+import { logger } from '@/utils/logger'
 
 // 表单数据
 const form = reactive<API.ImageGenerateRequest>({
@@ -211,7 +212,7 @@ const handleGenerate = async () => {
       message.error('生成失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('生成图像失败：', error)
+    logger.error('生成图像失败：', error)
     message.error('生成失败，请重试')
   } finally {
     generating.value = false

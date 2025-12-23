@@ -2,6 +2,7 @@ import router from '@/router'
 import { useLoginUserStore } from '@/stores/loginUser'
 import ACCESS_ENUM from './accessEnum'
 import checkAccess from './checkAccess'
+import { logger } from '@/utils/logger'
 
 router.beforeEach(async (to, from, next) => {
   // 获取登录用户信息
@@ -15,7 +16,7 @@ router.beforeEach(async (to, from, next) => {
     loginUser = loginUserStore.loginUser
   }
 
-  console.log('登陆用户信息', loginUser)
+  logger.log('登陆用户信息', loginUser)
 
   // 获取页面需要的权限
   const needAccess = (to.meta?.access as string) ?? ACCESS_ENUM.NOT_LOGIN

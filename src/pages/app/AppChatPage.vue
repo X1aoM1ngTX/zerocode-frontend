@@ -239,6 +239,7 @@ import DeploySuccessModal from '@/components/DeploySuccessModal.vue'
 import aiAvatar from '@/assets/game9-blue.png'
 import { API_BASE_URL, getStaticPreviewUrl } from '@/config/env'
 import { VisualEditor, type ElementInfo } from '@/utils/visualEditor'
+import { logger } from '@/utils/logger'
 
 import {
   CloudUploadOutlined,
@@ -361,7 +362,7 @@ const loadChatHistory = async (isLoadMore = false) => {
       historyLoaded.value = true
     }
   } catch (error) {
-    console.error('加载对话历史失败：', error)
+    logger.error('加载对话历史失败：', error)
     message.error('加载对话历史失败')
   } finally {
     loadingHistory.value = false
@@ -409,7 +410,7 @@ const fetchAppInfo = async () => {
       router.push('/')
     }
   } catch (error) {
-    console.error('获取应用信息失败：', error)
+    logger.error('获取应用信息失败：', error)
     message.error('获取应用信息失败')
     router.push('/')
   }
@@ -530,7 +531,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
           scrollToBottom()
         }
       } catch (error) {
-        console.error('解析消息失败:', error)
+        logger.error('解析消息失败:', error)
         handleError(error, aiMessageIndex)
       }
     }
@@ -556,7 +557,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
 
       try {
         const errorData = JSON.parse(event.data)
-        console.error('SSE业务错误事件:', errorData)
+        logger.error('SSE业务错误事件:', errorData)
 
         // 显示具体的错误信息
         const errorMessage = errorData.message || '生成过程中出现错误'
@@ -568,7 +569,7 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
         isGenerating.value = false
         eventSource?.close()
       } catch (parseError) {
-        console.error('解析错误事件失败:', parseError, '原始数据:', event.data)
+        logger.error('解析错误事件失败:', parseError, '原始数据:', event.data)
         handleError(new Error('服务器返回错误'), aiMessageIndex)
       }
     })
@@ -591,14 +592,14 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
       }
     }
   } catch (error) {
-    console.error('创建 EventSource 失败：', error)
+    logger.error('创建 EventSource 失败：', error)
     handleError(error, aiMessageIndex)
   }
 }
 
 // 错误处理函数
 const handleError = (error: unknown, aiMessageIndex: number) => {
-  console.error('生成代码失败：', error)
+  logger.error('生成代码失败：', error)
   messages.value[aiMessageIndex].content = '抱歉，生成过程中出现了错误，请重试。'
   messages.value[aiMessageIndex].loading = false
   message.error('生成失败，请重试')
@@ -668,7 +669,7 @@ const downloadCode = async () => {
     URL.revokeObjectURL(downloadUrl)
     message.success('代码下载成功')
   } catch (error) {
-    console.error('下载失败：', error)
+    logger.error('下载失败：', error)
     message.error('下载失败，请重试')
   } finally {
     downloading.value = false
@@ -696,7 +697,7 @@ const deployApp = async () => {
       message.error('部署失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('部署失败：', error)
+    logger.error('部署失败：', error)
     message.error('部署失败，请重试')
   } finally {
     deploying.value = false
@@ -754,7 +755,7 @@ const deleteApp = async () => {
       message.error('删除失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('删除失败：', error)
+    logger.error('删除失败：', error)
     message.error('删除失败')
   }
 }

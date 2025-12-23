@@ -27,6 +27,7 @@
 import { computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { CheckCircleOutlined, CopyOutlined } from '@ant-design/icons-vue'
+import { logger } from '@/utils/logger'
 
 interface Props {
   open: boolean
@@ -51,7 +52,7 @@ const handleCopyUrl = async () => {
     await navigator.clipboard.writeText(props.deployUrl)
     message.success('链接已复制到剪贴板')
   } catch (error) {
-    console.error('复制失败：', error)
+    logger.error('复制失败：', error)
     message.error('复制失败')
   }
 }

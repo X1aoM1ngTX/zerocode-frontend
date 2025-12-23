@@ -125,6 +125,7 @@ import { useLoginUserStore } from '@/stores/loginUser'
 import { addApp, listMyAppVoByPage, listGoodAppVoByPage } from '@/api/app'
 import { getDeployUrl } from '@/config/env'
 import AppCard from '@/components/AppCard.vue'
+import { logger } from '@/utils/logger'
 
 const router = useRouter()
 const loginUserStore = useLoginUserStore()
@@ -184,7 +185,7 @@ const createApp = async () => {
       message.error('创建失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('创建应用失败：', error)
+    logger.error('创建应用失败：', error)
     message.error('创建失败，请重试')
   } finally {
     creating.value = false
@@ -210,7 +211,7 @@ const loadMyApps = async () => {
       myAppsPage.total = res.data.data.totalRow || 0
     }
   } catch (error) {
-    console.error('加载我的应用失败：', error)
+    logger.error('加载我的应用失败：', error)
   }
 }
 
@@ -229,7 +230,7 @@ const loadFeaturedApps = async () => {
       featuredAppsPage.total = res.data.data.totalRow || 0
     }
   } catch (error) {
-    console.error('加载精选应用失败：', error)
+    logger.error('加载精选应用失败：', error)
   }
 }
 

@@ -127,6 +127,7 @@ import { formatTime } from '@/utils/time'
 import UserInfo from '@/components/UserInfo.vue'
 import { getStaticPreviewUrl } from '@/config/env'
 import type { FormInstance } from 'ant-design-vue'
+import { logger } from '@/utils/logger'
 
 const route = useRoute()
 const router = useRouter()
@@ -197,7 +198,7 @@ const fetchAppInfo = async () => {
       router.push('/')
     }
   } catch (error) {
-    console.error('获取应用信息失败：', error)
+    logger.error('获取应用信息失败：', error)
     message.error('获取应用信息失败')
     router.push('/')
   } finally {
@@ -236,7 +237,7 @@ const handleSubmit = async () => {
       message.error('修改失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('修改失败：', error)
+    logger.error('修改失败：', error)
     message.error('修改失败')
   } finally {
     submitting.value = false

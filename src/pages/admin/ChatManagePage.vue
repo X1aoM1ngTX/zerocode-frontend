@@ -71,6 +71,7 @@ import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { listAllChatHistoryByPageForAdmin } from '@/api/chatHistory'
 import { formatTime } from '@/utils/time'
+import { logger } from '@/utils/logger'
 
 const router = useRouter()
 
@@ -137,7 +138,7 @@ const fetchData = async () => {
       message.error('获取数据失败，' + res.data.message)
     }
   } catch (error) {
-    console.error('获取数据失败：', error)
+    logger.error('获取数据失败：', error)
     message.error('获取数据失败')
   }
 }
@@ -190,7 +191,7 @@ const deleteMessage = async (id: number | undefined) => {
     // 刷新数据
     fetchData()
   } catch (error) {
-    console.error('删除失败：', error)
+    logger.error('删除失败：', error)
     message.error('删除失败')
   }
 }

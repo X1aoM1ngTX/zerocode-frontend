@@ -148,6 +148,7 @@ import { UserOutlined } from "@ant-design/icons-vue";
 import { message, Modal } from "ant-design-vue";
 import { computed, onMounted, reactive, ref } from "vue";
 import dayjs from "dayjs";
+import { logger } from '@/utils/logger'
 
 // 图片加载失败处理
 const onImageError = (event: Event) => {
@@ -344,7 +345,7 @@ const handleEditOk = async () => {
       message.error("更新失败：" + res.data.message);
     }
   } catch (error) {
-    console.error("表单验证失败:", error);
+    logger.error("表单验证失败:", error);
   } finally {
     editLoading.value = false;
   }

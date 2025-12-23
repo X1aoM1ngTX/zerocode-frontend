@@ -96,6 +96,7 @@ import { listAppVoByPageByAdmin, deleteAppByAdmin, updateAppByAdmin } from '@/ap
 import { CODE_GEN_TYPE_OPTIONS, formatCodeGenType } from '@/utils/codeGenTypes'
 import { formatTime } from '@/utils/time'
 import UserInfo from '@/components/UserInfo.vue'
+import { logger } from '@/utils/logger'
 
 const router = useRouter()
 
@@ -177,7 +178,7 @@ const fetchData = async () => {
       message.error('获取数据失败，' + res.data.message)
     }
   } catch (error) {
-    console.error('获取数据失败：', error)
+    logger.error('获取数据失败：', error)
     message.error('获取数据失败')
   }
 }
@@ -237,7 +238,7 @@ const toggleFeatured = async (app: API.AppVO) => {
       message.error('操作失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('操作失败：', error)
+    logger.error('操作失败：', error)
     message.error('操作失败')
   }
 }
@@ -256,7 +257,7 @@ const deleteApp = async (id: number | undefined) => {
       message.error('删除失败：' + res.data.message)
     }
   } catch (error) {
-    console.error('删除失败：', error)
+    logger.error('删除失败：', error)
     message.error('删除失败')
   }
 }

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getLoginUser } from '@/api/user.ts'
+import { logger } from '@/utils/logger'
 
 export const useLoginUserStore = defineStore('loginUser', () => {
   // 默认值
@@ -16,10 +17,11 @@ export const useLoginUserStore = defineStore('loginUser', () => {
         loginUser.value = res.data.data
       }
     } catch (error) {
-      console.error('获取登录用户信息失败:', error)
+      logger.error('获取登录用户信息失败:', error)
       // 保持默认的未登录状态
     }
   }
+
   // 更新登录用户信息
   function setLoginUser(newLoginUser: API.LoginUserVO | null) {
     loginUser.value = newLoginUser || { userName: '未登录' }
