@@ -71,6 +71,7 @@ import {
   LogoutOutlined,
   TeamOutlined,
   AppstoreOutlined,
+  PictureOutlined,
 } from "@ant-design/icons-vue";
 import router from "@/router";
 import { useLoginUserStore } from "@/stores/loginUser";
@@ -89,13 +90,12 @@ const menus = ref([
     label: "欢迎",
     title: "欢迎",
   },
-  // 未来可以在这里添加更多顶部菜单项
-  // {
-  //   key: "/some-feature",
-  //   icon: () => h(SomeIcon),
-  //   label: "某功能",
-  //   title: "某功能",
-  // },
+  {
+    key: "/image-gen",
+    icon: () => h(PictureOutlined),
+    label: "图像生成",
+    title: "图像生成",
+  },
 ]);
 
 // 定义菜单项类型

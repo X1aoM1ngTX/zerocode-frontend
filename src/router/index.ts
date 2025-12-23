@@ -10,6 +10,11 @@ const router = createRouter({
       component: () => import("@/pages/HomePage.vue"),
     },
     {
+      path: '/image-gen',
+      name: '图像生成',
+      component: () => import("@/pages/ImageGenPage.vue"),
+    },
+    {
       path: '/user/login',
       name: '用户登录',
       component: () => import("@/pages/user/UserLoginPage.vue"),

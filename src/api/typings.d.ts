@@ -291,4 +291,29 @@ declare namespace API {
     userRole?: string
     createTime?: string
   }
+
+  type ImageGenerateRequest = {
+    userPrompt?: string
+    negativePrompt?: string
+    size?: string
+    promptExtend?: boolean
+    seed?: number
+  }
+
+  type ImageGenerateResponse = {
+    imageUrl?: string
+    text?: string
+    reasoningContent?: string
+    width?: number
+    height?: number
+    imageCount?: number
+    requestId?: string
+  }
+
+  type BaseResponseImageGenerateResponse = {
+    code?: number
+    data?: ImageGenerateResponse
+    message?: string
+    description?: string
+  }
 }

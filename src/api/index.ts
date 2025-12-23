@@ -5,10 +5,12 @@ import * as chatHistory from './chatHistory'
 import * as app from './app'
 import * as staticApi from './static'
 import * as health from './health'
+import * as image from './image'
 export default {
   user,
   chatHistory,
   app,
   staticApi,
   health,
+  image,
 }
