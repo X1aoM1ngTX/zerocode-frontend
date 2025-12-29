@@ -12,14 +12,20 @@
         <a-textarea
           v-model:value="userPrompt"
           placeholder="帮我创建个人博客网站"
-          :rows="4"
+          :auto-size="{ minRows: 4, maxRows: 10 }"
           :maxlength="1000"
           class="prompt-input"
         />
         <div class="input-actions">
-          <a-button type="primary" size="large" @click="createApp" :loading="creating">
+          <a-button @click="optimizePrompt" :loading="optimizing" class="optimize-btn">
             <template #icon>
-              <span>↑</span>
+              <ThunderboltOutlined />
+            </template>
+            优化提示词
+          </a-button>
+          <a-button type="primary" @click="createApp" :loading="creating">
+            <template #icon>
+              <EnterOutlined />
             </template>
           </a-button>
         </div>
@@ -121,8 +127,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { ThunderboltOutlined, EnterOutlined } from '@ant-design/icons-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
-import { addApp, listMyAppVoByPage, listGoodAppVoByPage } from '@/api/app'
+import { addApp, listMyAppVoByPage, listGoodAppVoByPage, optimizePrompt as optimizePromptApi } from '@/api/app'
 import { getDeployUrl } from '@/config/env'
 import AppCard from '@/components/AppCard.vue'
 import { logger } from '@/utils/logger'
@@ -133,6 +140,7 @@ const loginUserStore = useLoginUserStore()
 // 用户提示词
 const userPrompt = ref('')
 const creating = ref(false)
+const optimizing = ref(false)
 
 // 我的应用数据
 const myApps = ref<API.AppVO[]>([])
@@ -155,7 +163,38 @@ const setPrompt = (prompt: string) => {
   userPrompt.value = prompt
 }
 
-// 优化提示词功能已移除
+// 优化提示词
+const optimizePrompt = async () => {
+  if (!userPrompt.value.trim()) {
+    message.warning('请先输入应用描述')
+    return
+  }
+
+  if (!loginUserStore.loginUser.id) {
+    message.warning('请先登录')
+    await router.push('/user/login')
+    return
+  }
+
+  optimizing.value = true
+  try {
+    const res = await optimizePromptApi({
+      originalPrompt: userPrompt.value,
+    })
+
+    if (res.data.code === 0 && res.data.data) {
+      userPrompt.value = res.data.data
+      message.success('提示词优化成功')
+    } else {
+      message.error('优化失败：' + res.data.message)
+    }
+  } catch (error) {
+    logger.error('优化提示词失败：', error)
+    message.error('优化失败，请重试')
+  } finally {
+    optimizing.value = false
+  }
+}
 
 // 创建应用
 const createApp = async () => {
@@ -473,6 +512,21 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.optimize-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #8b5cf6;
+  transition: all 0.3s;
+}
+
+.optimize-btn:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #7c3aed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 
 /* 快捷按钮 */

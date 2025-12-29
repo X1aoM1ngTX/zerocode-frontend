@@ -179,3 +179,18 @@ export async function updateApp(body: API.AppUpdateRequest, options?: { [key: st
     ...(options || {}),
   })
 }
+
+/** AI优化提示词 使用AI优化用户的提示词，使其更适合代码生成 POST /app/optimize-prompt */
+export async function optimizePrompt(
+  body: API.PromptOptimizeRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseString>('/app/optimize-prompt', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}

@@ -142,6 +142,20 @@
               :disabled="isGenerating"
             />
             <div class="input-actions">
+              <a-tooltip v-if="isOwner" title="AI优化提示词">
+                <a-button
+                  type="default"
+                  @click="optimizeUserPrompt"
+                  :loading="optimizing"
+                  :disabled="!userInput.trim() || isGenerating"
+                  style="margin-right: 8px"
+                >
+                  <template #icon>
+                    <StarOutlined v-if="!optimizing" />
+                    <LoadingOutlined v-else />
+                  </template>
+                </a-button>
+              </a-tooltip>
               <a-button
                 type="primary"
                 @click="sendMessage"
@@ -228,7 +242,7 @@ import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
-import { getAppVoById, deployApp as deployAppApi, deleteApp as deleteAppApi } from '@/api/app'
+import { getAppVoById, deployApp as deployAppApi, deleteApp as deleteAppApi, optimizePrompt } from '@/api/app'
 import { listAppChatHistory } from '@/api/chatHistory'
 import { CodeGenTypeEnum, formatCodeGenType } from '@/utils/codeGenTypes'
 import request from '@/request'
@@ -249,6 +263,8 @@ import {
   DownloadOutlined,
   EditOutlined,
   GlobalOutlined,
+  StarOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons-vue'
 
 const route = useRoute()
@@ -289,6 +305,9 @@ const deployUrl = ref('')
 
 // 下载相关
 const downloading = ref(false)
+
+// 提示词优化相关
+const optimizing = ref(false)
 
 // 可视化编辑相关
 const isEditMode = ref(false)
@@ -787,6 +806,32 @@ const getInputPlaceholder = () => {
     return `正在编辑 ${selectedElementInfo.value.tagName.toLowerCase()} 元素，描述您想要的修改...`
   }
   return '请描述你想生成的网站，越详细效果越好哦'
+}
+
+// 优化用户提示词
+const optimizeUserPrompt = async () => {
+  const originalPrompt = userInput.value.trim()
+  if (!originalPrompt) {
+    message.warning('请先输入提示词')
+    return
+  }
+
+  optimizing.value = true
+  try {
+    const res = await optimizePrompt({ originalPrompt })
+    logger.info('优化提示词响应：', res)
+    if (res.data.code === 0 && res.data.data) {
+      userInput.value = res.data.data
+      message.success('提示词优化成功！')
+    } else {
+      message.error('优化失败：' + (res.data.message || '未知错误'))
+    }
+  } catch (error) {
+    logger.error('优化提示词失败：', error)
+    message.error('优化失败，请重试')
+  } finally {
+    optimizing.value = false
+  }
 }
 
 // 页面加载时获取应用信息

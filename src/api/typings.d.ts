@@ -34,6 +34,10 @@ declare namespace API {
     appName?: string
   }
 
+  type PromptOptimizeRequest = {
+    originalPrompt?: string
+  }
+
   type AppVO = {
     id?: number
     appName?: string

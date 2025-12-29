@@ -6,7 +6,7 @@
         <router-link to="/" class="logo-link">
           <div class="title-bar">
             <img class="logo" src="../assets/zerocode.png" alt="logo" />
-            <div class="title">ZeroCode 零代码应用生成平台</div>
+            <div class="title">ZeroCode 零码</div>
           </div>
         </router-link>
       </a-col>
@@ -65,7 +65,7 @@
 <script lang="ts" setup>
 import { h, ref, computed } from "vue";
 import {
-  HomeOutlined,
+  BuildOutlined,
   UserOutlined,
   DownOutlined,
   LogoutOutlined,
@@ -86,9 +86,9 @@ const loginUserStore = useLoginUserStore();
 const menus = ref([
   {
     key: "/",
-    icon: () => h(HomeOutlined),
-    label: "欢迎",
-    title: "欢迎",
+    icon: () => h(BuildOutlined),
+    label: "应用生成",
+    title: "应用生成",
   },
   {
     key: "/image-gen",
