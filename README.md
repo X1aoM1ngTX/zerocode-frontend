@@ -26,7 +26,7 @@ src/
 │   ├── typings.d.ts      # 类型定义
 │   └── user.ts           # 用户相关接口
 ├── assets/               # 静态资源
-│   └── zerocode.png      # 项目图标
+│   └── zerocode-v2.png   # 项目图标
 ├── components/           # 通用组件
 │   ├── AppCard.vue       # 应用卡片组件
 │   ├── AppDetailModal.vue # 应用详情弹窗

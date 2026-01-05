@@ -5,7 +5,7 @@
       <a-col flex="200px" class="logo-col">
         <router-link to="/" class="logo-link">
           <div class="title-bar">
-            <img class="logo" src="../assets/zerocode.png" alt="logo" />
+            <img class="logo" src="../assets/zerocode-v2.jpg" alt="logo" />
             <div class="title">ZeroCode 零码</div>
           </div>
         </router-link>
