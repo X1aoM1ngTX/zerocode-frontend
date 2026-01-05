@@ -1,6 +1,8 @@
 <template>
   <a-config-provider :locale="zhCN">
-    <BasicLayout />
+    <a-message-provider>
+      <BasicLayout />
+    </a-message-provider>
   </a-config-provider>
 </template>
 <script setup lang="ts">
