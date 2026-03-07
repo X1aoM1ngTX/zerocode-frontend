@@ -224,75 +224,138 @@ onMounted(() => {
 .user-profile-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 24px;
+  /* AI 主题渐变背景 */
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(139, 92, 246, 0.08), transparent 40%),
+    radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.08), transparent 40%);
+  min-height: calc(100vh - var(--layout-header-height));
 }
 
 .user-info-card {
-  margin-bottom: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  margin-bottom: 32px;
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-3);
+  overflow: hidden;
 }
 
 .avatar-container {
   text-align: center;
+  padding: 40px 24px 32px;
+  position: relative;
+}
+
+/* 发光效果 */
+.avatar-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 140px;
+  background: var(--gradient-ai-primary);
+  border-radius: 50%;
+  opacity: 0.2;
+  filter: blur(20px);
+  z-index: 0;
 }
 
 .user-avatar {
-  border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+  border: 3px solid white;
+  box-shadow: var(--shadow-glow-purple);
+  border-radius: 50%;
+  transition: all var(--transition-base);
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-glow-strong);
 }
 
 .avatar-uploader > .ant-upload {
   width: 120px;
   height: 120px;
-  border-radius: 8px;
+  border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 3px solid white;
+  box-shadow: var(--shadow-3);
+  background: var(--gradient-ai-card);
+  transition: all var(--transition-base);
+  position: relative;
+  z-index: 1;
 }
 
 .avatar-uploader > .ant-upload:hover {
   border-style: solid !important;
+  box-shadow: var(--shadow-glow-mixed);
+  transform: scale(1.05);
 }
 
 .avatar-uploader img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 50%;
 }
 
 .ant-upload-select-picture-card i {
   font-size: 32px;
-  color: #999;
+  color: var(--color-primary);
 }
 
 .ant-upload-select-picture-card .ant-upload-text {
   margin-top: 8px;
-  color: #666;
-  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .user-details {
-  padding: 16px;
+  padding: 24px;
 }
 
 .username {
-  font-size: 28px;
-  font-weight: bold;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
   margin-bottom: 8px;
-  color: #1a1a1a;
+  background: var(--gradient-ai-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
 }
 
 .user-account {
-  color: #666;
-  margin-bottom: 8px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.user-account::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
 }
 
 .user-profile {
-  color: #333;
-  line-height: 1.6;
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-lg);
   margin-bottom: 16px;
+  font-size: var(--font-size-sm);
 }
 
 .user-stats {

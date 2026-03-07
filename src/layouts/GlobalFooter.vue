@@ -47,9 +47,13 @@ import { GithubOutlined } from "@ant-design/icons-vue";
 
 <style scoped>
 .global-footer {
-  background-color: #fff;
-  padding: 10px 50px;
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+  padding: 20px 50px;
   margin-top: auto;
+  position: relative;
 }
 
 .footer-content {
@@ -62,41 +66,49 @@ import { GithubOutlined } from "@ant-design/icons-vue";
 }
 
 .footer-text {
-  font-size: 14px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .copyright {
-  font-weight: 500;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-base);
 }
 
 .divider {
-  margin: 0 12px;
+  margin: 0 16px;
+  color: var(--color-border);
 }
 
 .footer-text a {
-  color: #1890ff;
+  color: var(--color-primary);
   text-decoration: none;
-  transition: color 0.3s;
+  transition: all var(--transition-base);
+  font-weight: var(--font-weight-medium);
 }
 
 .footer-text a:hover {
-  color: #40a9ff;
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 
 .icp-number {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
 }
 
 .icp-number a {
-  color: #666;
+  color: var(--color-text-tertiary);
   text-decoration: none;
 }
 
 .icp-number a:hover {
-  color: #1890ff;
-  text-decoration: underline;
+  color: var(--color-primary);
 }
 
 .footer-links {
@@ -108,32 +120,34 @@ import { GithubOutlined } from "@ant-design/icons-vue";
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #fff;
-  color: #1890ff;
-  font-size: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 18px;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-2);
 }
 
 .github-link:hover {
-  background-color: #1890ff;
-  color: #fff;
+  background: var(--gradient-ai-primary);
+  border-color: transparent;
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  box-shadow: var(--shadow-glow-purple);
 }
 
 @media (max-width: 768px) {
   .global-footer {
-    padding: 16px 20px;
+    padding: 24px 20px;
   }
 
   .footer-content {
     flex-direction: column;
     text-align: center;
-    gap: 12px;
+    gap: 16px;
   }
 
   .divider {
@@ -141,9 +155,28 @@ import { GithubOutlined } from "@ant-design/icons-vue";
   }
 
   .footer-text {
-    display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
   }
+
+  .github-link {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* 深色模式适配 */
+[data-theme='dark'] .global-footer {
+  background: var(--glass-bg-dark);
+  border-top-color: rgba(139, 92, 246, 0.2);
+}
+
+[data-theme='dark'] .github-link {
+  background: var(--color-bg-container);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+[data-theme='dark'] .copyright {
+  color: var(--color-text-base);
 }
 </style>

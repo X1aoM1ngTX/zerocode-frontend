@@ -181,42 +181,64 @@ const handleForgotPassword = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 简化背景，使用纯色替代复杂渐变 */
-  background: #667eea;
+  /* AI 主题渐变背景 */
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.3), transparent 40%),
+    radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.3), transparent 40%),
+    linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   padding: 20px;
   position: relative;
   overflow: hidden;
 }
 
-/* 移除伪元素，减少重绘 */
 .login-page::before {
-  display: none;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
 }
 
 .login-container {
   width: 100%;
-  max-width: 1000px;
+  max-width: 1100px;
   display: flex;
-  /* 使用纯色背景，移除模糊效果 */
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), var(--shadow-glow-mixed);
   overflow: hidden;
   animation: slide-in-up 0.6s ease-out;
+  position: relative;
+  z-index: 1;
 }
 
 /* 左侧装饰区域 */
 .login-decorate {
   flex: 1;
   padding: 60px 40px;
-  /* 简化渐变背景 */
-  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-ai-dark);
   color: white;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.login-decorate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3), transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(6, 182, 212, 0.2), transparent 50%);
+  pointer-events: none;
 }
 
 .decorate-content {
@@ -228,30 +250,37 @@ const handleForgotPassword = () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .logo-icon {
   font-size: 48px;
+  filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8));
 }
 
 .logo-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-family: var(--font-family-heading);
+  font-size: 36px;
+  font-weight: var(--font-weight-bold);
   margin: 0;
-  color: white;
+  background: var(--gradient-ai-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .decorate-slogan {
-  font-size: 18px;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-lg);
   opacity: 0.9;
   margin-bottom: 60px;
+  color: rgba(248, 250, 252, 0.8);
 }
 
 .decorate-features {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .feature-item {
@@ -259,15 +288,18 @@ const handleForgotPassword = () => {
   align-items: center;
   gap: 16px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
-  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
 }
 
 .feature-item:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(139, 92, 246, 0.4);
   transform: translateX(8px);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
 }
 
 .feature-icon {
@@ -275,8 +307,9 @@ const handleForgotPassword = () => {
 }
 
 .feature-text {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: rgba(248, 250, 252, 0.9);
 }
 
 .decorate-bg {
@@ -291,7 +324,7 @@ const handleForgotPassword = () => {
 .bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .circle-1 {
@@ -299,7 +332,8 @@ const handleForgotPassword = () => {
   height: 300px;
   top: -100px;
   right: -100px;
-  animation: float 6s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%);
 }
 
 .circle-2 {
@@ -307,7 +341,8 @@ const handleForgotPassword = () => {
   height: 200px;
   bottom: -50px;
   left: -50px;
-  animation: float 8s ease-in-out infinite reverse;
+  animation: float 10s ease-in-out infinite reverse;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.15), transparent 70%);
 }
 
 .circle-3 {
@@ -316,12 +351,12 @@ const handleForgotPassword = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: float 10s ease-in-out infinite;
+  animation: float 12s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.12), transparent 70%);
 }
 
 @keyframes float {
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0);
   }
   50% {
@@ -336,7 +371,7 @@ const handleForgotPassword = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--color-bg-container);
 }
 
 .login-form-wrapper {
@@ -350,15 +385,17 @@ const handleForgotPassword = () => {
 }
 
 .form-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1e293b;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-base);
   margin: 0 0 12px 0;
 }
 
 .form-subtitle {
-  font-size: 14px;
-  color: #64748b;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -372,12 +409,21 @@ const handleForgotPassword = () => {
 
 .login-form :deep(.ant-input-affix-wrapper),
 .login-form :deep(.ant-input) {
-  border-radius: 8px;
-  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  border: 2px solid var(--color-border);
+  transition: all var(--transition-base);
+}
+
+.login-form :deep(.ant-input-affix-wrapper:focus),
+.login-form :deep(.ant-input-affix-wrapper-focused),
+.login-form :deep(.ant-input:focus) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
 }
 
 .login-form :deep(.ant-input-prefix) {
-  color: #94a3b8;
+  color: var(--color-primary);
   margin-right: 12px;
 }
 
@@ -389,56 +435,57 @@ const handleForgotPassword = () => {
 }
 
 .forgot-link {
-  color: #6366f1;
+  color: var(--color-primary);
   text-decoration: none;
-  font-size: 14px;
-  transition: color 0.3s;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-base);
   cursor: pointer;
 }
 
 .forgot-link:hover {
-  color: #4f46e5;
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 
 .login-form :deep(.ant-btn-primary) {
-  height: 48px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 50px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  background: var(--gradient-ai-primary);
   border: none;
-  transition: all 0.3s;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
 }
 
 .login-form :deep(.ant-btn-primary:hover) {
-  background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+  box-shadow: var(--shadow-glow-mixed);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
 .form-footer {
   text-align: center;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border);
 }
 
 .footer-text {
-  color: #64748b;
-  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .register-link {
-  color: #6366f1;
+  color: var(--color-primary);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-left: 8px;
-  transition: color 0.3s;
+  transition: color var(--transition-base);
 }
 
 .register-link:hover {
-  color: #4f46e5;
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 
@@ -464,6 +511,10 @@ const handleForgotPassword = () => {
 
   .login-form-container {
     padding: 40px 20px;
+  }
+
+  .form-title {
+    font-size: 24px;
   }
 }
 </style>

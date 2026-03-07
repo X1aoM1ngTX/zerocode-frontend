@@ -16,14 +16,17 @@
         <a-menu
           v-model:selectedKeys="current"
           mode="horizontal"
+          theme="light"
           :items="filteredMenus"
           @click="doMenuClick"
           class="nav-menu"
+          :overflowedIndicator="null"
+          :overflowedIndicatorPopupClassName="''"
         />
       </a-col>
 
       <!-- 用户区域 -->
-      <a-col flex="220px" class="user-col">
+      <a-col flex="180px" class="user-col">
         <div v-if="loginUserStore.loginUser.id" class="user-info">
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
@@ -241,14 +244,22 @@ const handleLogout = async () => {
 
 <style scoped>
 .header-container {
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  height: 64px;
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  height: var(--layout-header-height);
   width: 100%;
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000; /* 确保header在所有内容之上 */
+  z-index: 1000;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-base);
+}
+
+.header-container:hover {
+  box-shadow: 0 8px 40px rgba(139, 92, 246, 0.15);
 }
 
 .header-row {
@@ -268,35 +279,116 @@ const handleLogout = async () => {
 .title-bar {
   display: flex;
   align-items: center;
-  transition: all 0.3s;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+/* Logo 发光效果 */
+.title-bar::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: var(--gradient-ai-primary);
+  border-radius: var(--radius-xl);
+  opacity: 0;
+  filter: blur(20px);
+  transition: opacity var(--transition-base);
+  z-index: -1;
+}
+
+.title-bar:hover::after {
+  opacity: 0.2;
 }
 
 .title-bar:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .logo {
-  width: 36px;
-  height: 36px;
-  margin-right: 8px;
-  transition: all 0.3s;
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+  transition: all var(--transition-base);
+  filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.3));
 }
 
 .title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #3086fe;
+  font-family: var(--font-family-heading);
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  background: var(--gradient-ai-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
   white-space: nowrap;
+  letter-spacing: -0.5px;
 }
 
 .menu-col {
   display: flex;
   justify-content: center;
+  overflow: visible !important;
 }
 
 .nav-menu {
   border-bottom: none;
   background: transparent;
+  font-family: var(--font-family-body);
+  min-width: max-content;
+  overflow: visible !important;
+}
+
+/* 禁用菜单的溢出检测 */
+.nav-menu :deep(.ant-menu-list) {
+  overflow: visible !important;
+}
+
+.nav-menu :deep(.ant-menu-root) {
+  overflow: visible !important;
+}
+
+/* 强制隐藏溢出指示器和下拉菜单 */
+.nav-menu :deep(.ant-menu-overflowed-ref),
+.nav-menu :deep(.ant-menu-submenu),
+.nav-menu :deep(.ant-menu-submenu-arrow) {
+  display: none !important;
+}
+
+/* 强制隐藏折叠的菜单项并展开 */
+.nav-menu :deep(.ant-menu-hidden),
+.nav-menu :deep(.ant-menu-overflowed-submenu) {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 确保菜单项容器不隐藏 */
+.nav-menu :deep(.ant-menu-overflowed-container) {
+  display: none !important;
+}
+
+.nav-menu :deep(.ant-menu-item) {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+  border-radius: var(--radius-base);
+  margin: 0 4px;
+}
+
+.nav-menu :deep(.ant-menu-item:hover) {
+  color: var(--color-primary);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.nav-menu :deep(.ant-menu-item-selected) {
+  color: var(--color-primary);
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.nav-menu :deep(.ant-menu-item-selected::after) {
+  border-bottom-color: var(--color-primary);
 }
 
 .user-col {
@@ -311,61 +403,167 @@ const handleLogout = async () => {
 }
 
 .user-avatar {
-  margin-right: 8px;
-  background-color: #1890ff;
+  margin-right: 12px;
+  background: var(--gradient-ai-primary);
+  border: 2px solid transparent;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+/* Avatar 发光边框效果 */
+.user-avatar::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--gradient-ai-border);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.user-avatar:hover::before {
+  opacity: 1;
+}
+
+.user-avatar:hover {
+  box-shadow: var(--shadow-glow-purple);
 }
 
 .username {
-  margin-right: 4px;
-  font-weight: 500;
+  margin-right: 8px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-base);
+  transition: color var(--transition-base);
+}
+
+.ant-dropdown-link:hover .username {
+  color: var(--color-primary);
 }
 
 .auth-buttons {
   display: flex;
-  gap: 8px;
+  gap: 12px;
 }
 
 .login-btn {
-  font-weight: 500;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-base);
+}
+
+.login-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: rgba(139, 92, 246, 0.1);
 }
 
 .register-btn {
-  font-weight: 500;
+  font-weight: var(--font-weight-semibold);
+  background: var(--gradient-ai-primary);
+  border: none;
+  color: white;
+  transition: all var(--transition-base);
+}
+
+.register-btn:hover {
+  box-shadow: var(--shadow-glow-purple);
+  transform: translateY(-2px);
 }
 
 .ant-dropdown-link {
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: all 0.3s;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  background: transparent;
+  border: 1px solid transparent;
 }
 
 .ant-dropdown-link:hover {
-  background-color: #f5f5f5;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* 下拉菜单样式 */
+:deep(.ant-dropdown-menu) {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px;
+  box-shadow: var(--shadow-4);
+}
+
+:deep(.ant-dropdown-menu-item) {
+  border-radius: var(--radius-base);
+  padding: 10px 16px;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+}
+
+:deep(.ant-dropdown-menu-item:hover) {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-primary);
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .header-row {
-    padding: 0 12px;
+    padding: 0 16px;
   }
 
   .logo-col {
-    flex: 160px !important;
+    flex: 140px !important;
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
   }
 
   .title {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .user-col {
-    flex: 180px !important;
+    flex: 140px !important;
   }
 
   .username {
     display: none;
   }
+
+  .nav-menu {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* 深色模式适配 */
+[data-theme='dark'] .header-container {
+  background: var(--glass-bg-dark);
+  border-bottom-color: rgba(139, 92, 246, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .nav-menu :deep(.ant-menu-item) {
+  color: var(--color-text-secondary);
+}
+
+[data-theme='dark'] .nav-menu :deep(.ant-menu-item:hover) {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+[data-theme='dark'] .ant-dropdown-link:hover {
+  background: var(--color-bg-container);
+}
+
+[data-theme='dark'] :deep(.ant-dropdown-menu) {
+  background: var(--color-bg-container);
+  border-color: rgba(139, 92, 246, 0.3);
 }
 </style>

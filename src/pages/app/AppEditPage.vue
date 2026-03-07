@@ -280,45 +280,155 @@ onMounted(() => {
   padding: 24px;
   max-width: 1000px;
   margin: 0 auto;
+  min-height: calc(100vh - var(--layout-header-height));
+  /* AI 主题渐变背景 */
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(139, 92, 246, 0.08), transparent 40%),
+    radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.08), transparent 40%);
 }
 
 .page-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 20px 24px;
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-3);
 }
 
 .page-header h1 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  background: var(--gradient-ai-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .edit-container {
-  border-radius: 8px;
+  border-radius: var(--radius-xl);
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-3);
 }
 
 .cover-preview {
-  margin-top: 12px;
-  padding: 12px;
-  border: 1px solid #e8e8e8;
-  border-radius: 6px;
-  background: #fafafa;
+  margin-top: 16px;
+  padding: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-container);
+  transition: all var(--transition-base);
+}
+
+.cover-preview:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
 }
 
 .form-tip {
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-top: 8px;
 }
 
 :deep(.ant-card-head) {
-  background: #fafafa;
+  background: var(--color-bg-container);
+  border-bottom: 1px solid var(--color-border);
 }
 
 :deep(.ant-descriptions-item-label) {
-  background: #fafafa;
-  font-weight: 500;
+  background: var(--color-bg-layout);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  padding: 12px 16px;
+}
+
+:deep(.ant-descriptions-item-content) {
+  padding: 12px 16px;
+}
+
+:deep(.ant-form-item) {
+  margin-bottom: 24px;
+}
+
+:deep(.ant-form-item-label > label) {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-base);
+}
+
+:deep(.ant-input),
+:deep(.ant-input-number) {
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  transition: all var(--transition-base);
+}
+
+:deep(.ant-input:focus),
+:deep(.ant-input-number:focus) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+:deep(.ant-btn-primary) {
+  background: var(--gradient-ai-primary);
+  border: none;
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+  transition: all var(--transition-base);
+}
+
+:deep(.ant-btn-primary:hover) {
+  box-shadow: var(--shadow-glow-mixed);
+  transform: translateY(-2px);
+}
+
+:deep(.ant-card) {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2);
+  border: 1px solid var(--color-border);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  #appEditPage {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* 深色模式适配 */
+[data-theme='dark'] #appEditPage {
+  background:
+    radial-gradient(ellipse at 10% 20%, rgba(139, 92, 246, 0.06), transparent 40%),
+    radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.06), transparent 40%);
+}
+
+[data-theme='dark'] .page-header,
+[data-theme='dark'] .edit-container {
+  background: var(--glass-bg-dark);
+}
+
+[data-theme='dark'] :deep(.ant-descriptions-item-label) {
+  background: var(--color-bg-layout);
 }
 </style>

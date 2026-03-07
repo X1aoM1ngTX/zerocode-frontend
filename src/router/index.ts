@@ -23,6 +23,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/ImageGenPage.vue'),
     meta: {
       title: '图像生成',
+      access: ACCESS_ENUM.USER,
     },
   },
   {
@@ -94,7 +95,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/app/AppEditPage.vue'),
     meta: {
       title: '编辑应用',
-      access: ACCESS_ENUM.USER,
+      access: ACCESS_ENUM.ADMIN,
     },
   },
   {

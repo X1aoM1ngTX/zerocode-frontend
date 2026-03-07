@@ -131,39 +131,62 @@ const handleImageError = () => {
 
 <style scoped>
 .app-card {
-  background: var(--color-bg-container);
-  border-radius: var(--radius-lg);
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-3);
   transition: all var(--transition-base);
   cursor: pointer;
   position: relative;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border);
+}
+
+.app-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-ai-primary);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  z-index: 10;
 }
 
 .app-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-4);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-glow-mixed);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.app-card:hover::before {
+  opacity: 1;
 }
 
 .app-card--featured {
-  border: 2px solid var(--color-primary);
+  border: 2px solid transparent;
+  background: linear-gradient(var(--color-bg-container), var(--color-bg-container)) padding-box,
+              var(--gradient-ai-primary) border-box;
 }
 
-.app-card--featured::before {
+.app-card--featured::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.05) 0%, rgba(114, 46, 209, 0.05) 100%);
+  background: var(--gradient-ai-card);
+  opacity: 0.6;
   pointer-events: none;
   z-index: 0;
 }
 
 .app-preview {
-  height: 200px;
+  height: 220px;
   background: var(--color-bg-layout);
   display: flex;
   align-items: center;
@@ -180,7 +203,7 @@ const handleImageError = () => {
 }
 
 .app-card:hover .app-preview img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .app-placeholder {
@@ -190,16 +213,19 @@ const handleImageError = () => {
   justify-content: center;
   gap: var(--spacing-base);
   color: var(--color-text-quaternary);
+  background: var(--gradient-ai-card);
 }
 
 .placeholder-icon {
   font-size: 48px;
-  opacity: 0.5;
+  opacity: 0.6;
+  filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
 }
 
 .placeholder-text {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
 }
 
 .featured-badge {
@@ -208,16 +234,16 @@ const handleImageError = () => {
   left: var(--spacing-base);
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--gradient-ai-glow);
   color: white;
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  box-shadow: 0 2px 8px rgba(238, 90, 111, 0.3);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);
   z-index: 2;
-  animation: pulse 2s ease-in-out infinite;
+  animation: glow-pulse 2s ease-in-out infinite;
 }
 
 .app-overlay {
@@ -226,8 +252,9 @@ const handleImageError = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -257,13 +284,14 @@ const handleImageError = () => {
   font-size: 32px;
   color: var(--color-primary);
   animation: spin 1s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
 }
 
 .app-info {
-  padding: var(--spacing-base);
+  padding: 18px;
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-base);
+  gap: var(--spacing-md);
   position: relative;
   z-index: 1;
   background: var(--color-bg-container);
@@ -273,15 +301,22 @@ const handleImageError = () => {
   flex-shrink: 0;
 }
 
+.app-info-left .ant-avatar {
+  background: var(--gradient-ai-primary);
+  border: 2px solid var(--color-bg-container);
+  box-shadow: var(--shadow-glow-purple);
+}
+
 .app-info-right {
   flex: 1;
   min-width: 0;
 }
 
 .app-title {
+  font-family: var(--font-family-heading);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
   color: var(--color-text-base);
   white-space: nowrap;
   overflow: hidden;
@@ -294,7 +329,7 @@ const handleImageError = () => {
   margin: 0 0 8px 0;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -302,6 +337,7 @@ const handleImageError = () => {
 
 .app-author .anticon {
   font-size: 12px;
+  color: var(--color-primary);
 }
 
 .app-meta {
@@ -323,26 +359,39 @@ const handleImageError = () => {
 }
 
 .copy-btn {
-  color: #1890ff !important;
+  color: var(--color-primary) !important;
 }
 
 .copy-btn:hover {
-  color: #40a9ff !important;
-  background: rgba(24, 144, 255, 0.1) !important;
+  color: var(--color-primary-light) !important;
+  background: rgba(139, 92, 246, 0.15) !important;
 }
 
 @media (max-width: 640px) {
   .app-preview {
-    height: 160px;
+    height: 180px;
   }
 
   .app-overlay {
     opacity: 1;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(15, 23, 42, 0.5);
   }
 
   .app-overlay .ant-space {
     flex-direction: column;
   }
+}
+
+/* 深色模式适配 */
+[data-theme='dark'] .app-card {
+  background: var(--glass-bg-dark);
+}
+
+[data-theme='dark'] .app-info {
+  background: var(--color-bg-container);
+}
+
+[data-theme='dark'] .app-placeholder {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
 }
 </style>
