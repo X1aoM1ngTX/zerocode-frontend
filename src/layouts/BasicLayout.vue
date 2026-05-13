@@ -1,23 +1,30 @@
 <template>
   <div id="basicLayout">
     <a-layout style="min-height: 100vh">
-      <a-layout-header class="header"><GlobalHeader /></a-layout-header>
-      <a-layout-content class="content-full-width">
+      <a-layout-header v-if="!route.meta.fullscreen && !route.meta.hideHeader" class="header">
+        <GlobalHeader />
+      </a-layout-header>
+      <a-layout-content class="content-full-width" :class="{ fullscreen: route.meta.fullscreen }">
         <RouterView v-slot="{ Component, route }">
-          <Transition :name="route.meta.transition || 'fade'" mode="out-in">
+          <Transition :name="typeof route.meta.transition === 'string' ? route.meta.transition : 'fade'" mode="out-in">
             <component :is="Component" :key="route.path" />
           </Transition>
         </RouterView>
       </a-layout-content>
-      <a-layout-footer class="footer"><GlobalFooter /></a-layout-footer>
+      <a-layout-footer v-if="!route.meta.fullscreen && !route.meta.hideFooter" class="footer">
+        <GlobalFooter />
+      </a-layout-footer>
     </a-layout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { RouterView } from "vue-router"
+import { useRoute } from "vue-router"
 import GlobalHeader from "./GlobalHeader.vue"
 import GlobalFooter from "./GlobalFooter.vue"
+
+const route = useRoute()
 </script>
 
 <style scoped>
@@ -50,6 +57,11 @@ import GlobalFooter from "./GlobalFooter.vue"
   margin-left: 0;
   margin-top: var(--layout-header-height);
   min-height: calc(100vh - var(--layout-header-height) - var(--layout-footer-height));
+}
+
+.content-full-width.fullscreen {
+  margin-top: 0;
+  min-height: 100vh;
 }
 
 /* 页面过渡动画 */

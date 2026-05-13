@@ -27,9 +27,9 @@ export function setupRouterGuards(router: Router) {
 
     // 设置页面标题
     if (to.meta.title) {
-      document.title = `${to.meta.title} - ZeroCode`
+      document.title = `${to.meta.title} - Vexor`
     } else {
-      document.title = 'ZeroCode - 零代码开发平台'
+      document.title = 'Vexor - 零代码开发平台'
     }
 
     next()

@@ -24,7 +24,7 @@ export function useLoading(options: LoadingOptions = {}): LoadingReturn {
   const { initial = false, delay = 0 } = options
 
   const loading = ref(initial)
-  let timer: NodeJS.Timeout | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
 
   /**
    * 开始加载

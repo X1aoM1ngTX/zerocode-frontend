@@ -1,121 +1,124 @@
 <template>
   <div class="user-profile-page">
-    <!-- 用户信息区域 -->
-    <a-row :gutter="[16, 16]">
-      <!-- 左侧用户信息卡片 (2/3) -->
-      <a-col :xs="24" :lg="16">
-        <a-card class="user-info-card" :bordered="false">
-          <a-row :gutter="[16, 16]" align="middle">
-            <a-col :xs="24" :sm="8" :md="6" :lg="8">
-              <div class="avatar-container">
-                <a-avatar
-                  :size="120"
-                  :src="loginUser.userAvatar"
-                  class="user-avatar"
-                >
-                  <template #icon>
-                    <UserOutlined />
-                  </template>
-                </a-avatar>
-              </div>
-            </a-col>
-            <a-col :xs="24" :sm="16" :md="18" :lg="16">
-              <div class="user-details">
-                <h1 class="username">{{ loginUser.userName || "未设置用户名" }}</h1>
-                <p class="user-account">账号：{{ loginUser.userAccount }}</p>
-                <p class="user-profile">
-                  {{ loginUser.userProfile || "这个人很懒，什么都没留下~" }}
-                </p>
-                <div class="user-stats">
-                  <a-statistic title="用户角色" :value="userRoleText" />
-                  <a-divider type="vertical" />
-                  <a-statistic
-                    title="创建时间"
-                    :value="formatDate(loginUser.createTime)"
-                  />
-                </div>
-              </div>
-            </a-col>
-          </a-row>
-        </a-card>
-      </a-col>
-
-      <!-- 右侧VIP信息卡片 (1/3) -->
-      <a-col :xs="24" :lg="8" v-if="isOwnProfile">
-        <a-card class="user-vip-info-card" :bordered="false">
-          <div class="vip-content">
-            <h3 class="vip-title">
-              <CrownOutlined /> VIP会员服务
-            </h3>
-
-            <div class="vip-status">
-              <div v-if="loginUser.isVip" class="vip-info">
-                <a-tag color="gold" class="vip-badge">
-                  <CrownOutlined /> VIP会员
-                </a-tag>
-                <div class="vip-details">
-                  <div class="vip-number">
-                    你好{{ `VIP${loginUser.id && loginUser.id.toString().slice(-5).padStart(5, '0')}` }}
-                  </div>
-                  <div class="vip-expire" v-if="loginUser.vipExpireTime">
-                    到期时间：{{ formatDate(loginUser.vipExpireTime) }}
-                  </div>
-                </div>
-              </div>
-              <span v-else class="no-vip-tip"> 兑换VIP享受更多特权 </span>
-            </div>
-
-            <a-button
-              type="primary"
-              size="large"
-              @click="goToVipExchange"
-              class="vip-exchange-btn"
-              :icon="h(CrownOutlined)"
-              block
+    <div class="profile-shell">
+      <aside class="profile-sidebar">
+        <a-card class="profile-summary-card" :bordered="false">
+          <div class="avatar-container">
+            <a-avatar
+              :size="112"
+              :src="loginUser.userAvatar"
+              class="user-avatar"
             >
-              {{ loginUser.isVip ? '续费VIP' : 'VIP兑换' }}
-            </a-button>
+              <template #icon>
+                <UserOutlined />
+              </template>
+            </a-avatar>
+          </div>
 
-            <div class="vip-features">
-              <h4>VIP特权</h4>
-              <ul>
-                <li>无限制应用创建</li>
-                <li>高级模板使用</li>
-                <li>专属客服支持</li>
-                <li>优先功能体验</li>
-              </ul>
+          <div class="profile-identity">
+            <h1 class="username">{{ loginUser.userName || "未设置用户名" }}</h1>
+            <p class="user-account">{{ loginUser.userAccount }}</p>
+            <p class="user-profile">
+              {{ loginUser.userProfile || "这个人很懒，什么都没留下~" }}
+            </p>
+          </div>
+
+          <div class="profile-meta">
+            <div class="meta-item">
+              <span class="meta-label">用户角色</span>
+              <span class="meta-value">{{ userRoleText }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">创建时间</span>
+              <span class="meta-value">{{ formatDate(loginUser.createTime) }}</span>
             </div>
           </div>
         </a-card>
-      </a-col>
-    </a-row>
 
-    <!-- 标签页 -->
-    <a-tabs v-model:activeKey="activeTab" class="content-tabs">
-      <a-tab-pane key="settings" tab="个人设置" v-if="isOwnProfile">
-        <a-card title="编辑个人信息" :bordered="false">
+        <a-card v-if="isOwnProfile" class="vip-card" :bordered="false">
+          <div class="vip-header">
+            <div class="vip-icon">
+              <CrownOutlined />
+            </div>
+            <div>
+              <h2 class="vip-title">VIP会员服务</h2>
+              <p class="vip-subtitle">解锁更多生成与协作能力</p>
+            </div>
+          </div>
+
+          <div class="vip-status">
+            <div v-if="loginUser.isVip" class="vip-info">
+              <a-tag color="gold" class="vip-badge">
+                <CrownOutlined /> VIP会员
+              </a-tag>
+              <div class="vip-number">
+                {{ `VIP${loginUser.id && loginUser.id.toString().slice(-5).padStart(5, '0')}` }}
+              </div>
+              <div class="vip-expire" v-if="loginUser.vipExpireTime">
+                到期时间：{{ formatDate(loginUser.vipExpireTime) }}
+              </div>
+            </div>
+            <span v-else class="no-vip-tip">兑换VIP享受更多特权</span>
+          </div>
+
+          <a-button
+            type="primary"
+            size="large"
+            @click="goToVipExchange"
+            class="vip-exchange-btn"
+            :icon="h(CrownOutlined)"
+            block
+          >
+            {{ loginUser.isVip ? '续费VIP' : 'VIP兑换' }}
+          </a-button>
+
+          <div class="vip-features">
+            <div class="vip-feature">无限制应用创建</div>
+            <div class="vip-feature">高级模板使用</div>
+            <div class="vip-feature">专属客服支持</div>
+            <div class="vip-feature">优先功能体验</div>
+          </div>
+        </a-card>
+      </aside>
+
+      <main class="profile-main">
+        <a-card class="settings-card" :bordered="false">
+          <div class="settings-header">
+            <div>
+              <h2 class="settings-title">个人设置</h2>
+              <p class="settings-desc">维护你的公开资料与平台身份信息</p>
+            </div>
+          </div>
+
           <a-form
+            v-if="isOwnProfile"
             :model="editForm"
             layout="vertical"
             @finish="handleUpdateUser"
+            class="settings-form"
           >
             <a-form-item label="用户名" name="userName">
               <a-input
                 v-model:value="editForm.userName"
                 placeholder="请输入用户名"
+                size="large"
+                allow-clear
               />
             </a-form-item>
             <a-form-item label="个人简介" name="userProfile">
               <a-textarea
                 v-model:value="editForm.userProfile"
                 placeholder="请输入个人简介"
-                :rows="4"
+                :rows="6"
+                show-count
+                :maxlength="200"
               />
             </a-form-item>
-            <a-form-item>
+            <a-form-item class="form-actions">
               <a-button
                 type="primary"
                 html-type="submit"
+                size="large"
                 :loading="updateLoading"
               >
                 保存修改
@@ -123,8 +126,8 @@
             </a-form-item>
           </a-form>
         </a-card>
-      </a-tab-pane>
-    </a-tabs>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -210,9 +213,6 @@ const formatDate = (dateString?: string) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-// 标签页相关
-const activeTab = ref("settings");
-
 // 页面加载时获取数据
 onMounted(() => {
   // 重新获取用户信息
@@ -222,326 +222,276 @@ onMounted(() => {
 
 <style scoped>
 .user-profile-page {
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 24px;
-  /* AI 主题渐变背景 */
+  padding: 32px 24px;
   background:
-    radial-gradient(ellipse at 10% 20%, rgba(139, 92, 246, 0.08), transparent 40%),
-    radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.08), transparent 40%);
+    radial-gradient(ellipse at 10% 10%, rgba(79, 70, 229, 0.08), transparent 34%),
+    radial-gradient(ellipse at 88% 78%, rgba(20, 184, 166, 0.08), transparent 36%),
+    #f8fafc;
   min-height: calc(100vh - var(--layout-header-height));
 }
 
-.user-info-card {
-  margin-bottom: 32px;
-  background: var(--glass-bg-light);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-3);
+.profile-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.profile-sidebar {
+  display: grid;
+  gap: 16px;
+}
+
+.profile-summary-card,
+.vip-card,
+.settings-card {
+  border: 1px solid rgba(226, 232, 240, 0.86);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
   overflow: hidden;
+}
+
+.profile-summary-card,
+.settings-card {
+  background: rgba(255, 255, 255, 0.94);
 }
 
 .avatar-container {
   text-align: center;
-  padding: 40px 24px 32px;
+  padding: 24px 20px 16px;
   position: relative;
 }
 
-/* 发光效果 */
 .avatar-container::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 140px;
-  height: 140px;
-  background: var(--gradient-ai-primary);
+  width: 132px;
+  height: 132px;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(20, 184, 166, 0.18));
   border-radius: 50%;
-  opacity: 0.2;
-  filter: blur(20px);
+  filter: blur(18px);
   z-index: 0;
 }
 
 .user-avatar {
   position: relative;
   z-index: 1;
-  border: 3px solid white;
-  box-shadow: var(--shadow-glow-purple);
+  border: 4px solid #fff;
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.22);
   border-radius: 50%;
-  transition: all var(--transition-base);
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: var(--shadow-glow-strong);
-}
-
-.avatar-uploader > .ant-upload {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 3px solid white;
-  box-shadow: var(--shadow-3);
-  background: var(--gradient-ai-card);
-  transition: all var(--transition-base);
-  position: relative;
-  z-index: 1;
-}
-
-.avatar-uploader > .ant-upload:hover {
-  border-style: solid !important;
-  box-shadow: var(--shadow-glow-mixed);
-  transform: scale(1.05);
-}
-
-.avatar-uploader img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.ant-upload-select-picture-card i {
-  font-size: 32px;
-  color: var(--color-primary);
-}
-
-.ant-upload-select-picture-card .ant-upload-text {
-  margin-top: 8px;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.user-details {
-  padding: 24px;
 }
 
 .username {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-xxl);
+  font-size: 24px;
   font-weight: var(--font-weight-bold);
-  margin-bottom: 8px;
-  background: var(--gradient-ai-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #0f172a;
   text-align: center;
+  margin: 0 0 8px;
 }
 
 .user-account {
-  color: var(--color-text-secondary);
-  margin-bottom: 12px;
-  font-size: var(--font-size-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.user-account::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--color-primary);
-  border-radius: 50%;
+  color: #64748b;
+  margin: 0 0 14px;
+  font-size: 14px;
+  text-align: center;
+  word-break: break-all;
 }
 
 .user-profile {
-  color: var(--color-text-secondary);
+  color: #475569;
   line-height: var(--line-height-lg);
-  margin-bottom: 16px;
-  font-size: var(--font-size-sm);
-}
-
-.user-stats {
-  display: flex;
-  align-items: center;
-}
-
-.content-tabs {
-  background: #fff;
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.search-bar {
-  max-width: 400px;
-  margin-bottom: 16px;
-}
-
-.vip-actions {
+  margin: 0;
+  font-size: 14px;
   text-align: center;
+}
+
+.profile-identity {
+  padding: 0 24px 20px;
+}
+
+.profile-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.meta-item {
   padding: 16px;
+  text-align: center;
 }
 
-.vip-exchange-btn {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  border: none;
-  color: #333;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-  margin-bottom: 12px;
-  transition: all 0.3s ease;
+.meta-item + .meta-item {
+  border-left: 1px solid #e2e8f0;
 }
 
-.vip-exchange-btn:hover {
-  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
-  color: #333;
+.meta-label {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-bottom: 6px;
 }
 
-.vip-status {
+.meta-value {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vip-card {
+  background: linear-gradient(135deg, #fff7d6 0%, #ffffff 72%);
+}
+
+.vip-header {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.vip-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #a16207;
+  background: rgba(250, 204, 21, 0.22);
 }
 
 .vip-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
   width: 100%;
 }
 
 .vip-badge {
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.vip-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
+  width: max-content;
+  font-weight: 600;
 }
 
 .vip-number {
-  font-size: 16px;
-  font-weight: bold;
-  color: #d4af37;
-  background: linear-gradient(135deg, #fff8dc 0%, #ffd700 100%);
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid #d4af37;
-  box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
+  font-size: 15px;
+  font-weight: 700;
+  color: #854d0e;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(202, 138, 4, 0.22);
   width: 100%;
-  text-align: center;
 }
 
 .vip-expire {
-  font-size: 12px;
-  color: #666;
-  background: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
+  font-size: 13px;
+  color: #64748b;
 }
 
 .no-vip-tip {
-  font-size: 12px;
-  color: #666;
-  font-style: italic;
-}
-
-/* VIP信息卡片样式 */
-.user-vip-info-card {
-  background: linear-gradient(135deg, #fff8dc 0%, #fff 100%);
-  border: 1px solid #d4af37;
-  height: 100%;
-}
-
-.vip-content {
-  text-align: center;
-  padding: 8px;
+  display: block;
+  color: #854d0e;
+  font-size: 14px;
+  margin-bottom: 2px;
 }
 
 .vip-title {
-  color: #d4af37;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  color: #713f12;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 4px;
 }
 
-.vip-exchange-btn {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  border: none;
-  color: #333;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-  margin: 16px 0;
-  transition: all 0.3s ease;
-}
-
-.vip-exchange-btn:hover {
-  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
-  color: #333;
-}
-
-.vip-features {
-  margin-top: 20px;
-  text-align: left;
-}
-
-.vip-features h4 {
-  color: #d4af37;
-  font-size: 14px;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.vip-features ul {
-  list-style: none;
-  padding: 0;
+.vip-subtitle {
+  color: #854d0e;
+  font-size: 13px;
   margin: 0;
 }
 
-.vip-features li {
-  padding: 4px 0;
-  font-size: 12px;
-  color: #666;
-  position: relative;
-  padding-left: 16px;
+.vip-exchange-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+  border: none;
+  color: #3f2a02;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(245, 158, 11, 0.22);
+  margin: 16px 0;
 }
 
-.vip-features li:before {
-  content: "✓";
-  color: #d4af37;
-  position: absolute;
-  left: 0;
-  font-weight: bold;
+.vip-exchange-btn:hover {
+  background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
+  color: #3f2a02;
+}
+
+.vip-features {
+  display: grid;
+  gap: 8px;
+}
+
+.vip-feature {
+  color: #475569;
+  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(226, 232, 240, 0.72);
+  border-radius: 8px;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+.settings-card {
+  min-height: 520px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.settings-title {
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.settings-desc {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.settings-form {
+  max-width: 620px;
+}
+
+.form-actions {
+  margin-top: 28px;
+}
+
+@media (max-width: 900px) {
+  .profile-shell {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-  .user-details {
-    text-align: center;
-    padding-top: 16px;
+  .user-profile-page {
+    padding: 20px 16px;
   }
 
-  .user-stats {
-    justify-content: center;
+  .profile-meta {
+    grid-template-columns: 1fr;
   }
 
-  .vip-content {
-    padding: 16px;
-  }
-
-  .vip-title {
-    font-size: 16px;
+  .meta-item + .meta-item {
+    border-left: 0;
+    border-top: 1px solid #e2e8f0;
   }
 }
 </style>

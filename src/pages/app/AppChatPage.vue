@@ -124,13 +124,13 @@
           <div class="input-wrapper">
             <a-tooltip v-if="!isOwner" title="无法在别人的作品下对话哦~" placement="top">
               <a-textarea
-                  v-model:value="userInput"
-                  :placeholder="getInputPlaceholder()"
-                  :rows="4"
-                  :maxlength="1000"
-                  @keydown.enter.prevent="sendMessage"
-                  :disabled="isGenerating || !isOwner"
-                />
+                v-model:value="userInput"
+                :placeholder="getInputPlaceholder()"
+                :rows="4"
+                :maxlength="1000"
+                @keydown.enter.prevent="sendMessage"
+                :disabled="isGenerating || !isOwner"
+              />
             </a-tooltip>
             <a-textarea
               v-else
@@ -242,7 +242,12 @@ import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
-import { getAppVoById, deployApp as deployAppApi, deleteApp as deleteAppApi, optimizePrompt } from '@/api/app'
+import {
+  getAppVoById,
+  deployApp as deployAppApi,
+  deleteApp as deleteAppApi,
+  optimizePrompt,
+} from '@/api/app'
 import { listAppChatHistory } from '@/api/chatHistory'
 import { CodeGenTypeEnum, formatCodeGenType } from '@/utils/codeGenTypes'
 import request from '@/request'
@@ -250,7 +255,7 @@ import request from '@/request'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 import AppDetailModal from '@/components/AppDetailModal.vue'
 import DeploySuccessModal from '@/components/DeploySuccessModal.vue'
-import aiAvatar from '@/assets/zerocode-v2.png'
+import aiAvatar from '@/assets/vexor.png'
 import { API_BASE_URL, getStaticPreviewUrl } from '@/config/env'
 import { VisualEditor, type ElementInfo } from '@/utils/visualEditor'
 import { logger } from '@/utils/logger'

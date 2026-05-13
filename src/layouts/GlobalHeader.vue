@@ -5,8 +5,7 @@
       <a-col flex="200px" class="logo-col">
         <router-link to="/" class="logo-link">
           <div class="title-bar">
-            <img class="logo" src="../assets/zerocode-v2.png" alt="logo" />
-            <div class="title">ZeroCode 零码</div>
+            <img class="logo" src="../assets/vexor-argb.png" alt="logo" />
           </div>
         </router-link>
       </a-col>
@@ -30,11 +29,7 @@
         <div v-if="loginUserStore.loginUser.id" class="user-info">
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
-              <a-avatar
-                :size="32"
-                :src="loginUserStore.loginUser.userAvatar"
-                class="user-avatar"
-              >
+              <a-avatar :size="32" :src="loginUserStore.loginUser.userAvatar" class="user-avatar">
                 <template #icon>
                   <UserOutlined />
                 </template>
@@ -44,11 +39,7 @@
             </a>
             <template #overlay>
               <a-menu>
-                <a-menu-item
-                  v-for="item in dropdownMenuItems"
-                  :key="item.key"
-                  @click="item.action"
-                >
+                <a-menu-item v-for="item in dropdownMenuItems" :key="item.key" @click="item.action">
                   <component :is="item.icon" />
                   {{ item.label }}
                 </a-menu-item>
@@ -66,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref, computed } from "vue";
+import { h, ref, computed } from 'vue'
 import {
   BuildOutlined,
   UserOutlined,
@@ -75,191 +66,203 @@ import {
   TeamOutlined,
   AppstoreOutlined,
   PictureOutlined,
-} from "@ant-design/icons-vue";
-import router from "@/router";
-import { useLoginUserStore } from "@/stores/loginUser";
-import { userLogout } from "@/api/user";
-import { message } from "ant-design-vue";
-import checkAccess from "@/access/checkAccess";
-import ACCESS_ENUM from "@/access/accessEnum";
+  FireOutlined,
+  FolderOpenOutlined,
+} from '@ant-design/icons-vue'
+import router from '@/router'
+import { useLoginUserStore } from '@/stores/loginUser'
+import { userLogout } from '@/api/user'
+import { message } from 'ant-design-vue'
+import checkAccess from '@/access/checkAccess'
+import ACCESS_ENUM from '@/access/accessEnum'
 
-const loginUserStore = useLoginUserStore();
+const loginUserStore = useLoginUserStore()
 
 // 原始菜单项
 const menus = ref([
   {
-    key: "/",
+    key: '/',
     icon: () => h(BuildOutlined),
-    label: "应用生成",
-    title: "应用生成",
+    label: '应用生成',
+    title: '应用生成',
   },
   {
-    key: "/image-gen",
+    key: '/image-gen',
     icon: () => h(PictureOutlined),
-    label: "图像生成",
-    title: "图像生成",
+    label: '图像生成',
+    title: '图像生成',
   },
-]);
+  {
+    key: '/featured',
+    icon: () => h(FireOutlined),
+    label: '精选案例',
+    title: '精选案例',
+  },
+  {
+    key: '/works',
+    icon: () => h(FolderOpenOutlined),
+    label: '我的作品',
+    title: '我的作品',
+  },
+])
 
 // 定义菜单项类型
 interface MenuItem {
-  key: string;
-  icon: () => unknown;
-  label: string;
-  title: string;
+  key: string
+  icon: () => unknown
+  label: string
+  title: string
 }
 
 // 过滤菜单项的通用函数
 const filterMenusByPermission = (menuItems: MenuItem[]) => {
   return menuItems.filter((menu) => {
     // 根据菜单key找到对应的路由
-    const route = router.resolve(menu.key);
+    const route = router.resolve(menu.key)
 
     // 如果路由配置了hideInMenu，则隐藏该菜单
     if (route.meta?.hideInMenu) {
-      return false;
+      return false
     }
 
     // 根据权限过滤菜单，有权限则返回true，保留该菜单
-    return checkAccess(loginUserStore.loginUser, route.meta?.access as string);
-  });
-};
+    return checkAccess(loginUserStore.loginUser, route.meta?.access as string)
+  })
+}
 
 // 过滤后的顶部导航菜单项
 const filteredMenus = computed(() => {
-  return filterMenusByPermission(menus.value);
-});
+  return filterMenusByPermission(menus.value)
+})
 
 // 下拉菜单项配置
 const dropdownMenuItems = computed(() => {
   const items = [
     {
-      key: "profile",
+      key: 'profile',
       icon: UserOutlined,
-      label: "个人中心",
+      label: '个人中心',
       action: toProfile,
       // 个人中心需要用户登录权限
-      access: ACCESS_ENUM.USER
+      access: ACCESS_ENUM.USER,
     },
     {
-      key: "appManage",
+      key: 'appManage',
       icon: AppstoreOutlined,
-      label: "应用管理",
+      label: '应用管理',
       action: toAppManage,
       // 应用管理需要管理员权限
-      access: ACCESS_ENUM.ADMIN
+      access: ACCESS_ENUM.ADMIN,
     },
     {
-      key: "userManage",
+      key: 'userManage',
       icon: TeamOutlined,
-      label: "用户管理",
+      label: '用户管理',
       action: toUserManage,
       // 用户管理需要管理员权限
-      access: ACCESS_ENUM.ADMIN
+      access: ACCESS_ENUM.ADMIN,
     },
     {
-      key: "chatHistoryManage",
+      key: 'chatHistoryManage',
       icon: TeamOutlined,
-      label: "对话管理",
+      label: '对话管理',
       action: toChatHistoryManage,
       // 用户管理需要管理员权限
-      access: ACCESS_ENUM.ADMIN
+      access: ACCESS_ENUM.ADMIN,
     },
     {
-      key: "logout",
+      key: 'logout',
       icon: LogoutOutlined,
-      label: "退出登录",
+      label: '退出登录',
       action: handleLogout,
       // 退出登录不需要特殊权限
-      access: ACCESS_ENUM.NOT_LOGIN
-    }
-  ];
+      access: ACCESS_ENUM.NOT_LOGIN,
+    },
+  ]
 
   // 过滤有权限的菜单项
-  return items.filter(item =>
-    checkAccess(loginUserStore.loginUser, item.access)
-  );
-});
+  return items.filter((item) => checkAccess(loginUserStore.loginUser, item.access))
+})
 
 // 当前选中的菜单
-const current = ref<string[]>([]);
+const current = ref<string[]>([])
 
 // 菜单点击事件
 const doMenuClick = ({ key }: { key: string }) => {
   router.push({
     path: key,
-  });
-};
+  })
+}
 
 // 监听路由变化，更新当前选中的菜单
 router.afterEach((to) => {
-  current.value = [to.path];
-});
+  current.value = [to.path]
+})
 
 // 个人中心
 const toProfile = () => {
-  router.push("/user/profile");
-};
+  router.push('/user/profile')
+}
 
 // 应用管理
 const toAppManage = () => {
-  router.push("/admin/appManage");
-};
+  router.push('/admin/appManage')
+}
 
 // 用户管理
 const toUserManage = () => {
-  router.push("/admin/userManage");
-};
+  router.push('/admin/userManage')
+}
 
 // 用户管理
 const toChatHistoryManage = () => {
-  router.push("/admin/chatManage");
-};
+  router.push('/admin/chatManage')
+}
 
 // 登录
 const toLogin = () => {
-  router.push("/user/login");
-};
+  router.push('/user/login')
+}
 
 // 注册
 const toRegister = () => {
-  router.push("/user/register");
-};
+  router.push('/user/register')
+}
 
 // 退出登录
 const handleLogout = async () => {
-  const res = await userLogout();
+  const res = await userLogout()
   if (res.data.code === 0) {
     loginUserStore.setLoginUser({
-      userName: "未登录",
-    });
-    localStorage.removeItem("login-user");
-    message.success("退出登录成功");
-    await router.replace("/user/login");
+      userName: '未登录',
+    })
+    localStorage.removeItem('login-user')
+    message.success('退出登录成功')
+    await router.replace('/user/login')
   } else {
-    message.error("退出登录失败，" + (res.data.message || "未知错误"));
+    message.error('退出登录失败，' + (res.data.message || '未知错误'))
   }
-};
+}
 </script>
 
 <style scoped>
 .header-container {
-  background: var(--glass-bg-light);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(213, 222, 238, 0.9);
   height: var(--layout-header-height);
   width: 100%;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 22px rgba(28, 45, 90, 0.08);
   transition: all var(--transition-base);
 }
 
 .header-container:hover {
-  box-shadow: 0 8px 40px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 8px 26px rgba(28, 45, 90, 0.1);
 }
 
 .header-row {
@@ -279,37 +282,13 @@ const handleLogout = async () => {
 .title-bar {
   display: flex;
   align-items: center;
-  transition: all var(--transition-base);
-  position: relative;
-}
-
-/* Logo 发光效果 */
-.title-bar::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  background: var(--gradient-ai-primary);
-  border-radius: var(--radius-xl);
-  opacity: 0;
-  filter: blur(20px);
-  transition: opacity var(--transition-base);
-  z-index: -1;
-}
-
-.title-bar:hover::after {
-  opacity: 0.2;
-}
-
-.title-bar:hover {
-  transform: scale(1.02);
 }
 
 .logo {
-  width: 40px;
+  width: 112px;
   height: 40px;
-  margin-right: 12px;
-  transition: all var(--transition-base);
-  filter: drop-shadow(0 2px 8px rgba(139, 92, 246, 0.3));
+  object-fit: contain;
+  margin-right: 0;
 }
 
 .title {
@@ -370,25 +349,25 @@ const handleLogout = async () => {
 }
 
 .nav-menu :deep(.ant-menu-item) {
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
+  color: #344157;
+  font-weight: 700;
   transition: all var(--transition-base);
-  border-radius: var(--radius-base);
+  border-radius: 4px;
   margin: 0 4px;
 }
 
 .nav-menu :deep(.ant-menu-item:hover) {
-  color: var(--color-primary);
-  background: rgba(139, 92, 246, 0.1);
+  color: #254ff0;
+  background: rgba(65, 105, 255, 0.08);
 }
 
 .nav-menu :deep(.ant-menu-item-selected) {
-  color: var(--color-primary);
-  background: rgba(139, 92, 246, 0.15);
+  color: #254ff0;
+  background: rgba(65, 105, 255, 0.1);
 }
 
 .nav-menu :deep(.ant-menu-item-selected::after) {
-  border-bottom-color: var(--color-primary);
+  border-bottom-color: #4169ff;
 }
 
 .user-col {
@@ -443,33 +422,38 @@ const handleLogout = async () => {
 
 .auth-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .login-btn {
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  height: 34px;
+  padding: 0 18px;
+  border-radius: 5px;
+  font-weight: 700;
+  color: #172033;
+  border: 1px solid #d9e2f2;
   transition: all var(--transition-base);
 }
 
 .login-btn:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background: rgba(139, 92, 246, 0.1);
+  color: #254ff0;
+  border-color: #4169ff;
+  background: rgba(65, 105, 255, 0.08);
 }
 
 .register-btn {
-  font-weight: var(--font-weight-semibold);
-  background: var(--gradient-ai-primary);
+  height: 34px;
+  padding: 0 18px;
+  border-radius: 5px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4169ff 0%, #2554f4 100%);
   border: none;
   color: white;
   transition: all var(--transition-base);
 }
 
 .register-btn:hover {
-  box-shadow: var(--shadow-glow-purple);
-  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(48, 88, 244, 0.24);
 }
 
 .ant-dropdown-link {
@@ -522,7 +506,7 @@ const handleLogout = async () => {
   }
 
   .logo {
-    width: 32px;
+    width: 92px;
     height: 32px;
   }
 

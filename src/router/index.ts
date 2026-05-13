@@ -27,11 +27,36 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/featured',
+    name: '精选案例',
+    component: () => import('@/pages/FeaturedPage.vue'),
+    meta: {
+      title: '精选案例',
+    },
+  },
+  {
+    path: '/works',
+    name: '我的作品',
+    component: () => import('@/pages/WorksPage.vue'),
+    meta: {
+      title: '我的作品',
+    },
+  },
+  {
     path: '/user/login',
     name: '用户登录',
     component: () => import('@/pages/user/UserLoginPage.vue'),
     meta: {
       title: '用户登录',
+      hideInMenu: true,
+    },
+  },
+  {
+    path: '/user/reset-password',
+    name: '重置密码',
+    component: () => import('@/pages/user/UserResetPasswordPage.vue'),
+    meta: {
+      title: '重置密码',
       hideInMenu: true,
     },
   },
@@ -51,6 +76,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '个人中心',
       access: ACCESS_ENUM.USER,
+      hideFooter: true,
     },
   },
   {
@@ -60,6 +86,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '用户管理',
       access: ACCESS_ENUM.ADMIN,
+      hideFooter: true,
     },
   },
   {
@@ -69,6 +96,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '应用管理',
       access: ACCESS_ENUM.ADMIN,
+      hideFooter: true,
     },
   },
   {
@@ -78,6 +106,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '对话管理',
       access: ACCESS_ENUM.ADMIN,
+      hideFooter: true,
     },
   },
   {
@@ -87,6 +116,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: '应用对话',
       access: ACCESS_ENUM.USER,
+      fullscreen: true,
     },
   },
   {
@@ -124,4 +154,3 @@ const router = createRouter({
 setupRouterGuards(router)
 
 export default router
-

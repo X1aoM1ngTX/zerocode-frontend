@@ -23,7 +23,7 @@ export function useDebounce<T>(value: Ref<T>, options: DebounceOptions = {}) {
   const { delay = 300, immediate = false } = options
 
   const debouncedValue = ref(value.value) as Ref<T>
-  let timer: NodeJS.Timeout | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
 
   watch(
     value,
@@ -60,7 +60,7 @@ export function useDebounceFn<T extends (...args: any[]) => any>(
 ) {
   const { delay = 300 } = options
 
-  let timer: NodeJS.Timeout | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
 
   return (...args: Parameters<T>) => {
     if (timer) {
@@ -85,7 +85,7 @@ export function useThrottleFn<T extends (...args: any[]) => any>(
 ) {
   const { delay = 300, leading = true, trailing = true } = options
 
-  let timer: NodeJS.Timeout | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
   let lastArgs: Parameters<T> | null = null
 
   return (...args: Parameters<T>) => {

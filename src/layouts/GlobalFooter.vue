@@ -2,7 +2,7 @@
   <a-layout-footer class="global-footer">
     <div class="footer-content">
       <div class="footer-text">
-        <span class="copyright">© 2025 ZeroCode. All rights reserved.</span>
+        <span class="copyright">© 2025 Vexor. All rights reserved.</span>
         <span class="divider">|</span>
         <span
           >Powered by
@@ -16,11 +16,7 @@
         </span>
         <span class="divider">|</span>
         <span class="icp-number">
-          <a
-            href="https://beian.miit.gov.cn/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
             粤ICP备2025471762号-1
           </a>
         </span>
@@ -42,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { GithubOutlined } from "@ant-design/icons-vue";
+import { GithubOutlined } from '@ant-design/icons-vue'
 </script>
 
 <style scoped>

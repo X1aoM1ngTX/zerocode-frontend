@@ -24,12 +24,7 @@
             </template>
             查看对话
           </a-button>
-          <a-button
-            v-if="app.deployKey"
-            type="default"
-            size="small"
-            @click.stop="handleViewWork"
-          >
+          <a-button v-if="app.deployKey" type="default" size="small" @click.stop="handleViewWork">
             <template #icon>
               <RocketOutlined />
             </template>
@@ -60,7 +55,7 @@
         </h3>
         <p class="app-author">
           <UserOutlined />
-          {{ app.user?.userName || (featured ? 'ZeroCode 官方' : '未知用户') }}
+          {{ app.user?.userName || (featured ? 'Vexor 官方' : '未知用户') }}
         </p>
       </div>
     </div>
@@ -126,7 +121,6 @@ const handleImageError = () => {
   imageLoading.value = false
   imageError.value = true
 }
-
 </script>
 
 <style scoped>
@@ -168,8 +162,9 @@ const handleImageError = () => {
 
 .app-card--featured {
   border: 2px solid transparent;
-  background: linear-gradient(var(--color-bg-container), var(--color-bg-container)) padding-box,
-              var(--gradient-ai-primary) border-box;
+  background:
+    linear-gradient(var(--color-bg-container), var(--color-bg-container)) padding-box,
+    var(--gradient-ai-primary) border-box;
 }
 
 .app-card--featured::after {
