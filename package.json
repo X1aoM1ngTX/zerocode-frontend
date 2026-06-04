@@ -21,6 +21,7 @@
     "dayjs": "^1.11.19",
     "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
+    "material-icon-theme": "^5.34.0",
     "monaco-editor": "^0.55.1",
     "nprogress": "^0.2.0",
     "pinia": "^3.0.3",

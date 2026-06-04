@@ -177,7 +177,7 @@ const createApp = async () => {
 
     if (res.data.code === 0 && res.data.data) {
       message.success('应用创建成功')
-      await router.push(`/app/chat/${String(res.data.data)}`)
+      await router.push(`/app/chat/${String(res.data.data)}?tab=code`)
     } else {
       message.error('创建失败：' + res.data.message)
     }

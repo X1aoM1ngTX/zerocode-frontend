@@ -1,59 +1,58 @@
 <template>
   <div id="appChatPage">
-    <!-- 顶部栏 -->
-    <div class="header-bar">
-      <div class="header-left">
-        <h1 class="app-name">{{ appInfo?.appName || '网站生成器' }}</h1>
-        <a-tag v-if="appInfo?.codeGenType" color="blue" class="code-gen-type-tag">
+    <header class="workbench-header">
+      <div class="brand-area">
+        <router-link to="/" class="brand-link">
+          <img src="@/assets/vexor-argb.png" alt="Vexor" />
+        </router-link>
+        <button type="button" class="project-switch" @click="showAppDetail">
+          <span>{{ appInfo?.appName || '我的项目' }}</span>
+          <InfoCircleOutlined />
+        </button>
+        <a-tag v-if="appInfo?.codeGenType" class="code-gen-type-tag">
           {{ formatCodeGenType(appInfo.codeGenType) }}
         </a-tag>
       </div>
-      <div class="header-right">
-        <a-button type="default" @click="showAppDetail">
+
+      <div class="header-actions">
+        <a-button class="toolbar-btn" @click="showAppDetail">
           <template #icon>
             <InfoCircleOutlined />
           </template>
-          应用详情
+          详情
         </a-button>
         <a-tooltip v-if="!isDeployed" title="请先部署应用后再下载代码">
-          <a-button
-            type="primary"
-            ghost
-            @click="downloadCode"
-            :loading="downloading"
-            :disabled="!isOwner || !isDeployed"
-          >
-            <DownloadOutlined />
-            下载代码
+          <a-button class="toolbar-btn" @click="downloadCode" :loading="downloading" :disabled="!isOwner || !isDeployed">
+            <template #icon>
+              <DownloadOutlined />
+            </template>
+            导出
           </a-button>
         </a-tooltip>
         <a-button
           v-else
-          type="primary"
-          ghost
+          class="toolbar-btn"
           @click="downloadCode"
           :loading="downloading"
           :disabled="!isOwner"
         >
-          <DownloadOutlined />
-          下载代码
+          <template #icon>
+            <DownloadOutlined />
+          </template>
+          导出
         </a-button>
-        <a-button type="primary" @click="deployApp" :loading="deploying">
+        <a-button class="deploy-btn" type="primary" @click="deployApp" :loading="deploying">
           <template #icon>
             <CloudUploadOutlined />
           </template>
-          部署应用
+          部署
         </a-button>
       </div>
-    </div>
+    </header>
 
-    <!-- 主要内容区域 -->
-    <div class="main-content">
-      <!-- 左侧对话区域 -->
-      <div class="chat-section">
-        <!-- 消息区域 -->
+    <div class="workbench-body">
+      <aside class="chat-panel">
         <div class="messages-container" ref="messagesContainer">
-          <!-- 加载更多按钮 -->
           <div v-if="hasMoreHistory" class="load-more-container">
             <a-button type="link" @click="loadMoreHistory" :loading="loadingHistory" size="small">
               加载更多历史消息
@@ -62,26 +61,27 @@
           <div v-for="(message, index) in messages" :key="index" class="message-item">
             <div v-if="message.type === 'user'" class="user-message">
               <div class="message-content">{{ message.content }}</div>
-              <div class="message-avatar">
-                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
-              </div>
+              <div class="message-time">{{ message.createTime || '' }}</div>
             </div>
             <div v-else class="ai-message">
               <div class="message-avatar">
                 <a-avatar :src="aiAvatar" />
               </div>
               <div class="message-content">
-                <MarkdownRenderer v-if="message.content" :content="message.content" />
+                <div class="ai-name">Vexor AI</div>
+                <MarkdownRenderer
+                  v-if="message.content"
+                  :content="displayMessageContent(message.content)"
+                />
                 <div v-if="message.loading" class="loading-indicator">
                   <a-spin size="small" />
-                  <span>AI 正在思考...</span>
+                  <span>AI 正在生成...</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 选中元素信息展示 -->
         <a-alert
           v-if="selectedElementInfo"
           class="selected-element-alert"
@@ -95,9 +95,7 @@
                 <span class="element-tag">
                   选中元素：{{ selectedElementInfo.tagName.toLowerCase() }}
                 </span>
-                <span v-if="selectedElementInfo.id" class="element-id">
-                  #{{ selectedElementInfo.id }}
-                </span>
+                <span v-if="selectedElementInfo.id" class="element-id">#{{ selectedElementInfo.id }}</span>
                 <span v-if="selectedElementInfo.className" class="element-class">
                   .{{ selectedElementInfo.className.split(' ').join('.') }}
                 </span>
@@ -119,7 +117,6 @@
           </template>
         </a-alert>
 
-        <!-- 用户消息输入框 -->
         <div class="input-container">
           <div class="input-wrapper">
             <a-tooltip v-if="!isOwner" title="无法在别人的作品下对话哦~" placement="top">
@@ -144,11 +141,10 @@
             <div class="input-actions">
               <a-tooltip v-if="isOwner" title="AI优化提示词">
                 <a-button
-                  type="default"
+                  class="icon-action-btn"
                   @click="optimizeUserPrompt"
                   :loading="optimizing"
                   :disabled="!userInput.trim() || isGenerating"
-                  style="margin-right: 8px"
                 >
                   <template #icon>
                     <StarOutlined v-if="!optimizing" />
@@ -157,6 +153,7 @@
                 </a-button>
               </a-tooltip>
               <a-button
+                class="send-btn"
                 type="primary"
                 @click="sendMessage"
                 :loading="isGenerating"
@@ -169,35 +166,54 @@
             </div>
           </div>
         </div>
-      </div>
+      </aside>
 
-      <!-- 右侧网页展示区域 -->
-      <div class="preview-section">
-        <div class="preview-header">
-          <h3>生成后的网页展示</h3>
-          <div class="preview-actions">
-            <a-button
-              v-if="isOwner && previewUrl"
-              type="link"
-              :danger="isEditMode"
-              @click="toggleEditMode"
-              :class="{ 'edit-mode-active': isEditMode }"
-              style="padding: 0; height: auto; margin-right: 12px"
-            >
-              <template #icon>
-                <EditOutlined />
-              </template>
-              {{ isEditMode ? '退出编辑' : '编辑模式' }}
-            </a-button>
-            <a-button v-if="previewUrl" type="link" @click="openInNewTab">
-              <template #icon>
-                <ExportOutlined />
-              </template>
-              新窗口打开
-            </a-button>
-          </div>
+      <section class="workspace-panel">
+        <div class="workspace-tabs">
+          <button
+            type="button"
+            :class="{ active: activeWorkspaceTab === 'preview' }"
+            @click="activeWorkspaceTab = 'preview'"
+          >
+            预览
+          </button>
+          <button
+            type="button"
+            :class="{ active: activeWorkspaceTab === 'code' }"
+            @click="activeWorkspaceTab = 'code'"
+          >
+            代码
+          </button>
+          <div class="workspace-spacer"></div>
+          <a-button
+            v-if="isOwner && previewUrl && activeWorkspaceTab === 'preview'"
+            class="workspace-action"
+            :danger="isEditMode"
+            @click="toggleEditMode"
+            :class="{ 'edit-mode-active': isEditMode }"
+          >
+            <template #icon>
+              <EditOutlined />
+            </template>
+            {{ isEditMode ? '退出编辑' : '编辑模式' }}
+          </a-button>
+          <a-button v-if="previewUrl" class="workspace-action" @click="openInNewTab">
+            <template #icon>
+              <ExportOutlined />
+            </template>
+            新窗口
+          </a-button>
         </div>
-        <div class="preview-content">
+
+        <div v-if="activeWorkspaceTab === 'preview'" class="preview-content">
+          <div class="browser-bar">
+            <div class="browser-controls">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="address-bar">{{ previewUrl || 'http://localhost:3000' }}</div>
+          </div>
           <div v-if="!previewUrl && !isGenerating" class="preview-placeholder">
             <div class="placeholder-icon">
               <GlobalOutlined />
@@ -216,7 +232,29 @@
             @load="onIframeLoad"
           ></iframe>
         </div>
-      </div>
+
+        <div v-else-if="activeWorkspaceTab === 'code'" class="code-workspace">
+          <aside class="file-tree">
+            <div class="file-tree-title">文件树</div>
+            <AppFileTreeNode
+              :nodes="fileTree"
+              :active-path="activeFilePath"
+              @select="setActiveFile"
+            />
+          </aside>
+          <div class="code-pane">
+            <div class="code-pane-header">
+              <span>{{ activeFilePath || generatedFiles[0]?.path || 'index.html' }}</span>
+            </div>
+            <div ref="codePreviewContainer" class="code-preview-scroller">
+              <div class="code-gutter" aria-hidden="true">
+                <span v-for="line in codeLineNumbers" :key="line">{{ line }}</span>
+              </div>
+              <pre><code :class="`language-${activeCodeLanguage || 'plaintext'}`" v-html="highlightedCode"></code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- 应用详情弹窗 -->
@@ -238,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
+import { ref, onMounted, nextTick, onUnmounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useLoginUserStore } from '@/stores/loginUser'
@@ -251,10 +289,12 @@ import {
 import { listAppChatHistory } from '@/api/chatHistory'
 import { CodeGenTypeEnum, formatCodeGenType } from '@/utils/codeGenTypes'
 import request from '@/request'
+import hljs from 'highlight.js'
 
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 import AppDetailModal from '@/components/AppDetailModal.vue'
 import DeploySuccessModal from '@/components/DeploySuccessModal.vue'
+import AppFileTreeNode from '@/components/AppFileTreeNode.vue'
 import aiAvatar from '@/assets/vexor.png'
 import { API_BASE_URL, getStaticPreviewUrl } from '@/config/env'
 import { VisualEditor, type ElementInfo } from '@/utils/visualEditor'
@@ -270,6 +310,8 @@ import {
   GlobalOutlined,
   StarOutlined,
   LoadingOutlined,
+  MessageOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons-vue'
 
 const route = useRoute()
@@ -288,10 +330,37 @@ interface Message {
   createTime?: string
 }
 
+interface AppFileNode {
+  name: string
+  path: string
+  type: 'file' | 'directory'
+  language?: string
+  status?: string
+  children?: AppFileNode[]
+}
+
+interface FlatFileItem {
+  name: string
+  path: string
+  status: string
+  language?: string
+}
+
+interface GenerationEvent {
+  type: string
+  appId?: number
+  path?: string
+  content?: string
+  overwrite?: boolean
+  status?: string
+  message?: string
+}
+
 const messages = ref<Message[]>([])
 const userInput = ref('')
 const isGenerating = ref(false)
 const messagesContainer = ref<HTMLElement>()
+const codePreviewContainer = ref<HTMLElement>()
 
 // 对话历史相关
 const loadingHistory = ref(false)
@@ -302,6 +371,199 @@ const historyLoaded = ref(false)
 // 预览相关
 const previewUrl = ref('')
 const previewReady = ref(false)
+const shouldOpenCodeTab = route.query.tab === 'code'
+const activeWorkspaceTab = ref<'preview' | 'code'>(shouldOpenCodeTab ? 'code' : 'preview')
+const activeFilePath = ref('')
+const fileTree = ref<AppFileNode[]>([])
+const fileContents = reactive<Record<string, string>>({})
+const fileStatus = reactive<Record<string, string>>({})
+const buildStatus = ref<'idle' | 'generating' | 'building' | 'success' | 'error'>('idle')
+const buildMessage = ref('')
+
+const generatedFiles = computed<FlatFileItem[]>(() => {
+  const files: FlatFileItem[] = []
+  const walk = (nodes: AppFileNode[]) => {
+    nodes.forEach((node) => {
+      if (node.type === 'directory') {
+        walk(node.children || [])
+      } else {
+        files.push({
+          name: node.name,
+          path: node.path,
+          language: node.language,
+          status: fileStatus[node.path] || node.status || '已生成',
+        })
+      }
+    })
+  }
+  walk(fileTree.value)
+  return files
+})
+
+const codePreview = computed(() => {
+  const path = activeFilePath.value || generatedFiles.value[0]?.path
+  if (path && fileContents[path]) {
+    return fileContents[path]
+  }
+  if (isGenerating.value) {
+    return '// Vexor 正在生成代码，请稍候...'
+  }
+  return '// 选择文件后，这里会展示代码内容。'
+})
+
+const activeFile = computed(() => {
+  const fallback = generatedFiles.value[0]
+  return generatedFiles.value.find((file) => file.path === activeFilePath.value) || fallback
+})
+
+const activeCodeLanguage = computed(() => {
+  const source = activeFile.value?.language || activeFile.value?.path || activeFilePath.value
+  return normalizeHighlightLanguage(source || '')
+})
+
+const highlightedCode = computed(() => {
+  const code = codePreview.value
+  const language = activeCodeLanguage.value
+  try {
+    if (language && hljs.getLanguage(language)) {
+      return hljs.highlight(code, { language, ignoreIllegals: true }).value
+    }
+    return hljs.highlightAuto(code).value
+  } catch {
+    return escapeHtml(code)
+  }
+})
+
+const codeLineNumbers = computed(() => {
+  const lineCount = Math.max(1, codePreview.value.split(/\r\n|\r|\n/).length)
+  return Array.from({ length: lineCount }, (_, index) => index + 1)
+})
+
+const setActiveFile = async (path: string) => {
+  activeFilePath.value = path
+  if (!fileContents[path]) {
+    await loadFileContent(path)
+  }
+  scrollCodeToBottom()
+}
+
+const normalizeHighlightLanguage = (input: string) => {
+  const raw = input.toLowerCase().trim()
+  const extension = raw.includes('.') ? raw.split('.').pop() || raw : raw
+  const languageMap: Record<string, string> = {
+    html: 'xml',
+    htm: 'xml',
+    vue: 'xml',
+    xml: 'xml',
+    js: 'javascript',
+    jsx: 'javascript',
+    mjs: 'javascript',
+    cjs: 'javascript',
+    javascript: 'javascript',
+    ts: 'typescript',
+    tsx: 'typescript',
+    typescript: 'typescript',
+    css: 'css',
+    scss: 'scss',
+    less: 'less',
+    json: 'json',
+    md: 'markdown',
+    markdown: 'markdown',
+    yml: 'yaml',
+    yaml: 'yaml',
+    java: 'java',
+    py: 'python',
+    python: 'python',
+    txt: 'plaintext',
+  }
+  return languageMap[extension] || extension || 'plaintext'
+}
+
+const escapeHtml = (content: string) => {
+  return content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+const loadFileTree = async () => {
+  if (!appId.value) return
+  try {
+    const res = await request.get(`/app/${appId.value}/files`)
+    if (res.data.code === 0) {
+      fileTree.value = res.data.data || []
+      const firstFile = findFirstFile(fileTree.value)
+      if (!activeFilePath.value && firstFile) {
+        await setActiveFile(firstFile.path)
+      }
+    }
+  } catch (error) {
+    logger.warn('读取文件树失败：', error)
+  }
+}
+
+const loadFileContent = async (path: string) => {
+  if (!appId.value || !path) return
+  try {
+    const res = await request.get(`/app/${appId.value}/files/content`, {
+      params: { path },
+    })
+    if (res.data.code === 0 && res.data.data) {
+      fileContents[path] = res.data.data.content || ''
+      fileStatus[path] = '已生成'
+    }
+  } catch (error) {
+    logger.warn('读取文件内容失败：', error)
+    fileStatus[path] = '读取失败'
+  }
+}
+
+const findFirstFile = (nodes: AppFileNode[]): AppFileNode | undefined => {
+  for (const node of nodes) {
+    if (node.type === 'file') {
+      return node
+    }
+    const child = findFirstFile(node.children || [])
+    if (child) {
+      return child
+    }
+  }
+  return undefined
+}
+
+const upsertFileNode = (path: string, status = '生成中') => {
+  const segments = path.split('/').filter(Boolean)
+  let nodes = fileTree.value
+  let currentPath = ''
+  segments.forEach((segment, index) => {
+    currentPath = currentPath ? `${currentPath}/${segment}` : segment
+    const isFile = index === segments.length - 1
+    let node = nodes.find((item) => item.name === segment && item.path === currentPath)
+    if (!node) {
+      node = {
+        name: segment,
+        path: currentPath,
+        type: isFile ? 'file' : 'directory',
+        status,
+        children: isFile ? undefined : [],
+      }
+      nodes.push(node)
+    }
+    if (isFile) {
+      node.status = status
+      fileStatus[path] = status
+    } else {
+      node.children ||= []
+      nodes = node.children
+    }
+  })
+}
+
+const displayMessageContent = (content: string) => {
+  return content.trim()
+}
 
 // 部署相关
 const deploying = ref(false)
@@ -325,7 +587,9 @@ const visualEditor = new VisualEditor({
 
 // 权限相关
 const isOwner = computed(() => {
-  return appInfo.value?.userId === loginUserStore.loginUser.id
+  const appUserId = appInfo.value?.userId
+  const loginUserId = loginUserStore.loginUser.id
+  return appUserId != null && loginUserId != null && String(appUserId) === String(loginUserId)
 })
 
 const isAdmin = computed(() => {
@@ -350,7 +614,7 @@ const loadChatHistory = async (isLoadMore = false) => {
   loadingHistory.value = true
   try {
     const params: API.listAppChatHistoryParams = {
-      appId: appId.value,
+      appId: appId.value as unknown as number,
       pageSize: 10,
     }
     // 如果是加载更多，传递最后一条消息的创建时间作为游标
@@ -415,8 +679,9 @@ const fetchAppInfo = async () => {
       appInfo.value = res.data.data
       // 先加载对话历史
       await loadChatHistory()
+      await loadFileTree()
       // 如果有至少2条对话记录，展示对应的网站
-      if (messages.value.length >= 2) {
+      if (messages.value.length >= 2 || generatedFiles.value.length > 0) {
         updatePreview()
       }
       // 检查是否需要自动发送初始提示词
@@ -520,6 +785,11 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
   let streamCompleted = false
 
   try {
+    activeWorkspaceTab.value = 'code'
+    previewReady.value = false
+    buildStatus.value = 'generating'
+    buildMessage.value = '正在生成代码'
+
     // 获取 axios 配置的 baseURL
     const baseURL = request.defaults.baseURL || API_BASE_URL
 
@@ -529,53 +799,57 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
       message: userMessage,
     })
 
-    const url = `${baseURL}/app/chat/gen/code?${params}`
+    const url = `${baseURL}/app/chat/gen/code/v2?${params}`
 
     // 创建 EventSource 连接
     eventSource = new EventSource(url, {
       withCredentials: true,
     })
 
-    let fullContent = ''
-
-    // 处理接收到的消息
-    eventSource.onmessage = function (event) {
+    const handleGenerationEvent = (event: MessageEvent) => {
       if (streamCompleted) return
-
       try {
-        // 解析JSON包装的数据
-        const parsed = JSON.parse(event.data)
-        const content = parsed.d
-
-        // 拼接内容
-        if (content !== undefined && content !== null) {
-          fullContent += content
-          messages.value[aiMessageIndex].content = fullContent
-          messages.value[aiMessageIndex].loading = false
-          scrollToBottom()
-        }
+        const parsed = JSON.parse(event.data) as GenerationEvent
+        processGenerationEvent(parsed, aiMessageIndex)
       } catch (error) {
-        logger.error('解析消息失败:', error)
+        logger.error('解析生成事件失败:', error)
         handleError(error, aiMessageIndex)
       }
     }
 
-    // 处理done事件
+    const eventTypes = [
+      'assistant_message',
+      'tool_call',
+      'file_start',
+      'file_delta',
+      'file_done',
+      'file_delete',
+      'build_status',
+      'preview_ready',
+      'generation_error',
+    ]
+    eventTypes.forEach((type) => {
+      eventSource?.addEventListener(type, handleGenerationEvent as EventListener)
+    })
+
     eventSource.addEventListener('done', function () {
       if (streamCompleted) return
 
       streamCompleted = true
       isGenerating.value = false
+      messages.value[aiMessageIndex].loading = false
       eventSource?.close()
 
-      // 延迟更新预览，确保后端已完成处理
       setTimeout(async () => {
         await fetchAppInfo()
+        await loadFileTree()
         updatePreview()
-      }, 1000)
+        if (buildStatus.value !== 'error') {
+          activeWorkspaceTab.value = 'preview'
+        }
+      }, 500)
     })
 
-    // 处理 business-error 事件（后端限流等错误）
     eventSource.addEventListener('business-error', function (event: MessageEvent) {
       if (streamCompleted) return
 
@@ -605,12 +879,17 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
       if (eventSource?.readyState === EventSource.CONNECTING) {
         streamCompleted = true
         isGenerating.value = false
+        messages.value[aiMessageIndex].loading = false
         eventSource?.close()
 
         setTimeout(async () => {
           await fetchAppInfo()
+          await loadFileTree()
           updatePreview()
-        }, 1000)
+          if (buildStatus.value !== 'error') {
+            activeWorkspaceTab.value = 'preview'
+          }
+        }, 500)
       } else {
         handleError(new Error('SSE连接错误'), aiMessageIndex)
       }
@@ -619,6 +898,78 @@ const generateCode = async (userMessage: string, aiMessageIndex: number) => {
     logger.error('创建 EventSource 失败：', error)
     handleError(error, aiMessageIndex)
   }
+}
+
+const processGenerationEvent = (event: GenerationEvent, aiMessageIndex: number) => {
+  switch (event.type) {
+    case 'assistant_message':
+      appendAiMessage(aiMessageIndex, event.content || '')
+      break
+    case 'tool_call':
+      appendToolMessage(aiMessageIndex, event.message || event.content || '')
+      break
+    case 'file_start':
+      if (event.path) {
+        upsertFileNode(event.path, '生成中')
+        activeFilePath.value = event.path
+        activeWorkspaceTab.value = 'code'
+        scrollCodeToBottom()
+      }
+      break
+    case 'file_delta':
+      if (event.path) {
+        upsertFileNode(event.path, '生成中')
+        fileContents[event.path] = event.overwrite === false
+          ? `${fileContents[event.path] || ''}${event.content || ''}`
+          : event.content || ''
+        activeFilePath.value = event.path
+        activeWorkspaceTab.value = 'code'
+        scrollCodeToBottom()
+      }
+      break
+    case 'file_done':
+      if (event.path) {
+        upsertFileNode(event.path, '已生成')
+        fileStatus[event.path] = '已生成'
+      }
+      break
+    case 'build_status':
+      buildStatus.value = normalizeBuildStatus(event.status)
+      buildMessage.value = event.message || event.content || ''
+      appendToolMessage(aiMessageIndex, buildMessage.value)
+      break
+    case 'preview_ready':
+      buildStatus.value = 'success'
+      buildMessage.value = event.message || event.content || '预览已更新'
+      updatePreview()
+      loadFileTree()
+      activeWorkspaceTab.value = 'preview'
+      break
+    case 'generation_error':
+      buildStatus.value = 'error'
+      appendToolMessage(aiMessageIndex, event.message || event.content || '生成过程中出现错误')
+      message.error(event.message || event.content || '生成过程中出现错误')
+      break
+  }
+  messages.value[aiMessageIndex].loading = false
+  scrollToBottom()
+}
+
+const appendAiMessage = (aiMessageIndex: number, content: string) => {
+  if (!content) return
+  messages.value[aiMessageIndex].content += content
+}
+
+const appendToolMessage = (aiMessageIndex: number, content: string) => {
+  if (!content) return
+  messages.value[aiMessageIndex].content += `\n\n> ${content}\n`
+}
+
+const normalizeBuildStatus = (status?: string) => {
+  if (status === 'building') return 'building'
+  if (status === 'success') return 'success'
+  if (status === 'error') return 'error'
+  return 'generating'
 }
 
 // 错误处理函数
@@ -639,6 +990,7 @@ const updatePreview = () => {
     const timestamp = new Date().getTime()
     previewUrl.value = `${newPreviewUrl}?t=${timestamp}`
     previewReady.value = true
+    loadFileTree()
   }
 }
 
@@ -647,6 +999,14 @@ const scrollToBottom = () => {
   if (messagesContainer.value) {
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
+}
+
+const scrollCodeToBottom = () => {
+  nextTick(() => {
+    if (codePreviewContainer.value) {
+      codePreviewContainer.value.scrollTop = codePreviewContainer.value.scrollHeight
+    }
+  })
 }
 
 // 下载代码
@@ -858,164 +1218,229 @@ onUnmounted(() => {
 <style scoped>
 #appChatPage {
   height: 100vh;
+  min-height: 680px;
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  /* AI 主题渐变背景 */
-  background:
-    radial-gradient(ellipse at 10% 20%, rgba(139, 92, 246, 0.08), transparent 40%),
-    radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.08), transparent 40%),
-    var(--color-bg-layout);
-  position: relative;
+  background: #070b14;
+  color: #e5ebf7;
+  overflow: hidden;
 }
 
-/* 科技感网格 */
-#appChatPage::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* 顶部栏 */
-.header-bar {
-  position: relative;
-  z-index: 1;
+.workbench-header {
+  height: 54px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  background: var(--glass-bg-light);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-2);
+  gap: 18px;
+  padding: 0 18px;
+  background: #0a0f1c;
+  border-bottom: 1px solid #20283a;
 }
 
-.header-left {
+.brand-area,
+.header-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+}
+
+.brand-link img {
+  width: 86px;
+  height: 30px;
+  object-fit: contain;
+  filter: brightness(1.2);
+}
+
+.project-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #263149;
+  border-radius: 5px;
+  background: #111827;
+  color: #d8e2f4;
+  cursor: pointer;
+}
+
+.project-switch span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .code-gen-type-tag {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  color: #9fb6ff;
+  background: rgba(65, 105, 255, 0.12);
+  border-color: rgba(65, 105, 255, 0.32);
 }
 
-.app-name {
-  margin: 0;
-  font-family: var(--font-family-heading);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  background: var(--gradient-ai-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.toolbar-btn,
+.workspace-action {
+  height: 32px;
+  border-color: #263149;
+  background: #111827;
+  color: #d8e2f4;
 }
 
-.header-right {
-  display: flex;
-  gap: 12px;
+.toolbar-btn:hover,
+.workspace-action:hover {
+  border-color: #4169ff;
+  color: #ffffff;
+  background: #172036;
 }
 
-/* 主要内容区域 */
-.main-content {
-  position: relative;
-  z-index: 1;
+.deploy-btn {
+  height: 32px;
+  border: none;
+  background: linear-gradient(135deg, #4169ff 0%, #254ff0 100%);
+  font-weight: 700;
+}
+
+.workbench-body {
   flex: 1;
-  display: flex;
-  gap: 16px;
-  padding: 8px 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(360px, 34%) 1fr;
+  gap: 1px;
   overflow: hidden;
+  background: #20283a;
 }
 
-/* 左侧对话区域 */
-.chat-section {
-  flex: 3;
+.chat-panel {
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--glass-bg-light);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-3);
   overflow: hidden;
+  background: #0b111d;
+}
+
+.chat-panel-header {
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid #1f293a;
+}
+
+.new-chat-btn {
+  width: 100%;
+  height: 38px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #4b67ff 0%, #254ff0 100%);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.workspace-nav {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.workspace-nav-item {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #9ca9bd;
+  cursor: pointer;
+  text-align: left;
+}
+
+.workspace-nav-item.active,
+.workspace-nav-item:hover {
+  color: #f8fbff;
+  background: #161f31;
+  border-color: #263149;
 }
 
 .messages-container {
   flex: 1;
-  padding: 20px;
+  height: 100%;
+  min-height: 0;
+  padding: 18px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   scroll-behavior: smooth;
 }
 
-/* 自定义滚动条 */
-.messages-container::-webkit-scrollbar {
-  width: 6px;
+.messages-container::-webkit-scrollbar,
+.code-preview-scroller::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
 }
 
-.messages-container::-webkit-scrollbar-track {
+.messages-container::-webkit-scrollbar-track,
+.code-preview-scroller::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.messages-container::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
-  transition: background var(--transition-base);
-}
-
-.messages-container::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
+.messages-container::-webkit-scrollbar-thumb,
+.code-preview-scroller::-webkit-scrollbar-thumb {
+  background: #263149;
+  border-radius: 999px;
 }
 
 .message-item {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .user-message {
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .ai-message {
   display: flex;
-  justify-content: flex-start;
   align-items: flex-start;
   gap: 12px;
 }
 
 .message-content {
-  max-width: 75%;
-  padding: 14px 18px;
-  border-radius: var(--radius-lg);
-  line-height: 1.6;
+  max-width: 88%;
+  padding: 13px 15px;
+  border-radius: 8px;
+  line-height: 1.7;
   word-wrap: break-word;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
 }
 
 .user-message .message-content {
-  background: var(--gradient-ai-primary);
-  color: white;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, #4169ff 0%, #254ff0 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 3px;
 }
 
 .ai-message .message-content {
-  background: var(--color-bg-container);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-base);
-  border-bottom-left-radius: 4px;
-  box-shadow: var(--shadow-2);
+  background: transparent;
+  color: #d8e2f4;
+  padding: 0;
+}
+
+.ai-name {
+  margin-bottom: 8px;
+  color: #f8fbff;
+  font-weight: 700;
+}
+
+.message-time {
+  margin-top: 6px;
+  color: #69758a;
+  font-size: 12px;
 }
 
 .message-avatar {
@@ -1023,150 +1448,380 @@ onUnmounted(() => {
 }
 
 .message-avatar .ant-avatar {
-  border: 2px solid var(--color-bg-layout);
-  box-shadow: var(--shadow-2);
-}
-
-.ai-message .message-avatar .ant-avatar {
-  background: var(--gradient-ai-primary);
-  box-shadow: var(--shadow-glow-purple);
+  background: #15213a;
+  border: 1px solid #2a3650;
 }
 
 .loading-indicator {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: #91a8ff;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-/* 加载更多按钮 */
 .load-more-container {
   text-align: center;
-  padding: 8px 0;
-  margin-bottom: 16px;
+  padding: 6px 0 12px;
 }
 
-/* 输入区域 */
+.generated-files-card {
+  margin: 14px 0 4px 44px;
+  padding: 14px;
+  border: 1px solid #263149;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(22, 31, 49, 0.96), rgba(13, 19, 32, 0.96));
+}
+
+.generated-files-title {
+  margin-bottom: 10px;
+  color: #e5ebf7;
+  font-weight: 700;
+}
+
+.generated-file-row {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 0;
+  color: #aebbd0;
+  font-size: 13px;
+}
+
+.generated-file-row em {
+  color: #6f7d91;
+  font-style: normal;
+}
+
 .input-container {
-  padding: 16px;
-  background: var(--color-bg-container);
-  border-top: 1px solid var(--color-border);
+  padding: 14px;
+  background: #0b111d;
+  border-top: 1px solid #1f293a;
 }
 
 .input-wrapper {
   position: relative;
 }
 
-.input-wrapper :deep(.ant-input),
-.input-wrapper :deep(.ant-input-textarea-show-count::after) {
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--color-border);
-  padding: 14px 16px;
-  transition: all var(--transition-base);
-  font-size: var(--font-size-base);
+.input-wrapper :deep(.ant-input) {
+  min-height: 96px;
+  padding: 14px 84px 14px 14px;
+  border: 1px solid #263149;
+  border-radius: 8px;
+  background: #111827;
+  color: #e5ebf7;
+  resize: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.input-wrapper :deep(.ant-input:focus),
-.input-wrapper :deep(.ant-input-focused) {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+.input-wrapper :deep(.ant-input::placeholder) {
+  color: #69758a;
+}
+
+.input-wrapper :deep(.ant-input:focus) {
+  border-color: #4169ff;
+  box-shadow: 0 0 0 3px rgba(65, 105, 255, 0.16);
 }
 
 .input-actions {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  right: 10px;
+  bottom: 10px;
   display: flex;
   gap: 8px;
-  align-items: center;
 }
 
-/* 右侧预览区域 */
-.preview-section {
-  flex: 4;
+.icon-action-btn,
+.send-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 6px;
+}
+
+.icon-action-btn {
+  border-color: #263149;
+  background: #0b111d;
+  color: #aebbd0;
+}
+
+.send-btn {
+  border: none;
+  background: linear-gradient(135deg, #4169ff 0%, #254ff0 100%);
+}
+
+.workspace-panel {
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--glass-bg-light);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-3);
   overflow: hidden;
+  background: #090e19;
 }
 
-.preview-header {
+.workspace-tabs {
+  height: 44px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-container);
+  gap: 2px;
+  padding: 0 12px;
+  background: #0b111d;
+  border-bottom: 1px solid #20283a;
 }
 
-.preview-header h3 {
-  margin: 0;
-  font-family: var(--font-family-heading);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-base);
+.workspace-tabs > button {
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #9ca9bd;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.preview-actions {
-  display: flex;
-  gap: 8px;
+.workspace-tabs > button.active,
+.workspace-tabs > button:hover {
+  color: #ffffff;
+  background: #151d2e;
+  border-color: #263149;
+}
+
+.workspace-spacer {
+  flex: 1;
 }
 
 .preview-content {
   flex: 1;
-  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  background: var(--color-bg-layout);
+  background: #f8fbff;
 }
 
-.preview-placeholder {
+.browser-bar {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  background: #111827;
+  border-bottom: 1px solid #263149;
+}
+
+.browser-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.browser-controls span {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #39445a;
+}
+
+.address-bar {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 5px;
+  background: #1b2436;
+  color: #aebbd0;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-placeholder,
+.preview-loading {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: var(--color-text-tertiary);
+  color: #61708a;
 }
 
 .placeholder-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.preview-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--color-primary);
+  margin-bottom: 14px;
+  color: #4169ff;
+  font-size: 44px;
 }
 
 .preview-loading p {
   margin-top: 16px;
-  font-weight: var(--font-weight-medium);
+  font-weight: 700;
 }
 
 .preview-iframe {
+  flex: 1;
   width: 100%;
-  height: 100%;
+  min-height: 0;
   border: none;
-  background: white;
+  background: #ffffff;
+}
+
+.code-workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  overflow: hidden;
+  background: #090e19;
+}
+
+.file-tree {
+  min-height: 0;
+  padding: 14px;
+  overflow: auto;
+  background: #0b111d;
+  border-right: 1px solid #20283a;
+}
+
+.file-tree-title {
+  margin-bottom: 10px;
+  color: #e5ebf7;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.code-pane {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.code-pane-header {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: #111827;
+  border-bottom: 1px solid #20283a;
+  color: #e5ebf7;
+}
+
+.code-pane-header em {
+  color: #69758a;
+  font-style: normal;
+  font-size: 12px;
+}
+
+.code-preview-scroller {
+  flex: 1;
+  height: 0;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  color: #24292f;
+  background: #ffffff;
+  font-family: var(--font-family-code);
+  font-size: 13px;
+  line-height: 22px;
+  tab-size: 2;
+}
+
+.code-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  flex: 0 0 52px;
+  padding: 18px 10px 18px 0;
+  border-right: 1px solid #d8dee4;
+  background: #f6f8fa;
+  color: #8c959f;
+  text-align: right;
+  user-select: none;
+}
+
+.code-gutter span {
+  display: block;
+  height: 22px;
+  line-height: 22px;
+}
+
+.code-preview-scroller pre {
+  min-width: max-content;
+  margin: 0;
+  padding: 18px;
+  overflow: visible;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 22px;
+  white-space: pre;
+}
+
+.code-preview-scroller code {
+  display: block;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 22px;
+}
+
+.code-preview-scroller :deep(.hljs-tag),
+.code-preview-scroller :deep(.hljs-name),
+.code-preview-scroller :deep(.hljs-selector-tag) {
+  color: #116329;
+}
+
+.code-preview-scroller :deep(.hljs-attr),
+.code-preview-scroller :deep(.hljs-attribute),
+.code-preview-scroller :deep(.hljs-property),
+.code-preview-scroller :deep(.hljs-variable) {
+  color: #0550ae;
+}
+
+.code-preview-scroller :deep(.hljs-string),
+.code-preview-scroller :deep(.hljs-section) {
+  color: #0a3069;
+}
+
+.code-preview-scroller :deep(.hljs-keyword),
+.code-preview-scroller :deep(.hljs-built_in) {
+  color: #cf222e;
+}
+
+.code-preview-scroller :deep(.hljs-title),
+.code-preview-scroller :deep(.hljs-selector-class),
+.code-preview-scroller :deep(.hljs-selector-id) {
+  color: #8250df;
+}
+
+.code-preview-scroller :deep(.hljs-number),
+.code-preview-scroller :deep(.hljs-literal) {
+  color: #0550ae;
+}
+
+.code-preview-scroller :deep(.hljs-comment) {
+  color: #6e7781;
+  font-style: italic;
 }
 
 .selected-element-alert {
-  margin: 0 16px;
-  border-radius: var(--radius-lg);
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  margin: 0 14px;
+  border-radius: 8px;
+  background: rgba(65, 105, 255, 0.12);
+  border: 1px solid rgba(65, 105, 255, 0.28);
 }
 
 .selected-element-info {
@@ -1183,28 +1838,28 @@ onUnmounted(() => {
 
 .element-tag {
   padding: 4px 10px;
-  background: var(--gradient-ai-primary);
+  background: linear-gradient(135deg, #4169ff 0%, #254ff0 100%);
   color: white;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .element-id {
   padding: 4px 10px;
-  background: rgba(6, 182, 212, 0.2);
-  color: var(--color-secondary-dark);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
+  background: rgba(90, 124, 255, 0.16);
+  color: #9fb6ff;
+  border-radius: 999px;
+  font-size: 12px;
   font-family: var(--font-family-code);
 }
 
 .element-class {
   padding: 4px 10px;
-  background: rgba(236, 72, 153, 0.2);
-  color: var(--color-accent-dark);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
+  background: rgba(37, 207, 173, 0.12);
+  color: #7de8d2;
+  border-radius: 999px;
+  font-size: 12px;
   font-family: var(--font-family-code);
 }
 
@@ -1215,86 +1870,292 @@ onUnmounted(() => {
 }
 
 .element-item {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: 13px;
+  color: #aebbd0;
   display: flex;
   gap: 8px;
 }
 
 .element-selector-code {
   padding: 2px 8px;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(7, 11, 20, 0.6);
   border-radius: 4px;
   font-family: var(--font-family-code);
-  font-size: var(--font-size-xs);
+  font-size: 12px;
 }
 
-/* 响应式设计 */
+/* Light workbench theme */
+#appChatPage {
+  background: #eef3fb;
+  color: #172033;
+}
+
+.workbench-header {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom-color: #dbe3ef;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.brand-link img {
+  filter: none;
+}
+
+.project-switch,
+.toolbar-btn,
+.workspace-action {
+  border-color: #d7dfec;
+  background: #ffffff;
+  color: #334155;
+}
+
+.project-switch:hover,
+.toolbar-btn:hover,
+.workspace-action:hover {
+  border-color: #9db4ff;
+  background: #f2f6ff;
+  color: #254ff0;
+}
+
+.code-gen-type-tag {
+  color: #3157d5;
+  background: #eef3ff;
+  border-color: #cbd7ff;
+}
+
+.deploy-btn,
+.send-btn,
+.new-chat-btn,
+.element-tag {
+  background: linear-gradient(135deg, #4169ff 0%, #254ff0 100%);
+  color: #ffffff;
+}
+
+.workbench-body {
+  background: #dbe3ef;
+}
+
+.chat-panel,
+.input-container {
+  background: #f7f9fc;
+}
+
+.chat-panel-header,
+.input-container {
+  border-color: #dbe3ef;
+}
+
+.workspace-nav-item {
+  color: #64748b;
+}
+
+.workspace-nav-item.active,
+.workspace-nav-item:hover {
+  color: #254ff0;
+  background: #eef3ff;
+  border-color: #cbd7ff;
+}
+
+.messages-container::-webkit-scrollbar-thumb,
+.code-preview-scroller::-webkit-scrollbar-thumb {
+  background: #c7d0df;
+}
+
+.ai-message .message-content {
+  color: #273449;
+}
+
+.ai-name,
+.generated-files-title,
+.file-tree-title {
+  color: #172033;
+}
+
+.message-time,
+.generated-file-row em,
+.code-pane-header em {
+  color: #7b8798;
+}
+
+.message-avatar .ant-avatar {
+  background: #eef3ff;
+  border-color: #d7dfec;
+}
+
+.loading-indicator,
+.placeholder-icon {
+  color: #3157d5;
+}
+
+.generated-files-card {
+  border-color: #dbe3ef;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.generated-file-row,
+.element-item {
+  color: #516078;
+}
+
+.input-wrapper :deep(.ant-input) {
+  border-color: #d7dfec;
+  background: #ffffff;
+  color: #172033;
+}
+
+.input-wrapper :deep(.ant-input::placeholder) {
+  color: #8793a6;
+}
+
+.input-wrapper :deep(.ant-input:focus) {
+  border-color: #4169ff;
+  box-shadow: 0 0 0 3px rgba(65, 105, 255, 0.13);
+}
+
+.icon-action-btn {
+  border-color: #d7dfec;
+  background: #ffffff;
+  color: #64748b;
+}
+
+.icon-action-btn:hover {
+  border-color: #9db4ff;
+  background: #f2f6ff;
+  color: #254ff0;
+}
+
+.workspace-panel,
+.workspace-tabs,
+.code-workspace {
+  background: #ffffff;
+}
+
+.workspace-tabs {
+  border-bottom-color: #dbe3ef;
+}
+
+.workspace-tabs > button {
+  color: #64748b;
+}
+
+.workspace-tabs > button.active,
+.workspace-tabs > button:hover {
+  color: #254ff0;
+  background: #eef3ff;
+  border-color: #cbd7ff;
+}
+
+.browser-bar {
+  background: #f3f6fb;
+  border-bottom-color: #dbe3ef;
+}
+
+.browser-controls span {
+  background: #c7d0df;
+}
+
+.address-bar {
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  color: #64748b;
+}
+
+.preview-placeholder,
+.preview-loading {
+  color: #64748b;
+}
+
+.file-tree {
+  background: #f8fafd;
+  border-right-color: #dbe3ef;
+}
+
+.code-pane-header {
+  background: #f8fafd;
+  border-bottom-color: #dbe3ef;
+  color: #172033;
+}
+
+.code-preview-scroller {
+  color: #24292f;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(15, 23, 42, 0.04);
+}
+
+.code-gutter {
+  background: #f6f8fa;
+  border-right-color: #d8dee4;
+}
+
+.selected-element-alert {
+  background: #eef3ff;
+  border-color: #cbd7ff;
+}
+
+.element-id {
+  background: #eef3ff;
+  color: #3157d5;
+}
+
+.element-class {
+  background: #ecfdf7;
+  color: #087f5b;
+}
+
+.element-selector-code {
+  background: #eef2f7;
+  color: #334155;
+}
+
 @media (max-width: 1024px) {
-  .main-content {
-    flex-direction: column;
+  #appChatPage {
+    min-height: 900px;
   }
 
-  .chat-section,
-  .preview-section {
-    flex: none;
-    height: 50vh;
+  .workbench-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 420px minmax(0, 1fr);
+  }
+
+  .code-workspace {
+    grid-template-columns: 190px 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  #appChatPage {
-    padding: 8px;
+  .workbench-header {
+    height: auto;
+    min-height: 54px;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 10px 12px;
   }
 
-  .header-bar {
-    padding: 12px 16px;
+  .brand-area,
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
-  .app-name {
-    font-size: var(--font-size-base);
-  }
-
-  .main-content {
-    padding: 0;
-    gap: 8px;
+  .workbench-body {
+    grid-template-rows: 420px minmax(0, 1fr);
   }
 
   .message-content {
-    max-width: 85%;
+    max-width: 94%;
   }
 
-  .input-actions {
-    position: static;
-    margin-top: 12px;
+  .workspace-tabs {
+    overflow-x: auto;
   }
 
-  .selected-element-alert {
-    margin: 0 8px;
+  .code-workspace {
+    grid-template-columns: 1fr;
   }
-}
 
-/* 深色模式适配 */
-[data-theme='dark'] #appChatPage {
-  background:
-    radial-gradient(ellipse at 10% 20%, rgba(139, 92, 246, 0.06), transparent 40%),
-    radial-gradient(ellipse at 90% 80%, rgba(6, 182, 212, 0.06), transparent 40%),
-    var(--color-bg-layout);
-}
+  .file-tree {
+    display: none;
+  }
 
-[data-theme='dark'] #appChatPage::before {
-  background-image:
-    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
-}
-
-[data-theme='dark'] .header-bar,
-[data-theme='dark'] .chat-section,
-[data-theme='dark'] .preview-section {
-  background: var(--glass-bg-dark);
-}
-
-[data-theme='dark'] .preview-content {
-  background: var(--color-bg-container);
 }
 </style>
