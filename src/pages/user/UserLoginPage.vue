@@ -9,10 +9,10 @@
         layout="vertical"
         @finish="handleSubmit"
       >
-        <a-form-item name="userAccount" label="邮箱地址" :rules="[{ required: true, message: '请输入账号' }]">
+        <a-form-item name="userAccount" label="账号" :rules="[{ required: true, message: '请输入账号' }]">
           <a-input
             v-model:value="formState.userAccount"
-            placeholder="admin@vexor.com"
+            placeholder="请输入账号"
             size="large"
             allow-clear
           />

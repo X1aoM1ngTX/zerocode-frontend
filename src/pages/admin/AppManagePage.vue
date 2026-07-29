@@ -69,6 +69,7 @@
         </template>
         <template v-else-if="column.key === 'action'">
           <a-space>
+            <a-button type="default" size="small" @click="openAppChat(record)"> 打开 </a-button>
             <a-button type="primary" size="small" @click="editApp(record)"> 编辑 </a-button>
             <a-button
               type="default"
@@ -76,7 +77,7 @@
               @click="toggleFeatured(record)"
               :class="{ 'featured-btn': record.priority === 99 }"
             >
-              {{ record.priority === 99 ? '取消精选' : '精选' }}
+              {{ record.priority === 99 ? '取消精选' : '精选应用' }}
             </a-button>
             <a-popconfirm title="确定要删除这个应用吗？" @confirm="deleteApp(record.id)">
               <a-button danger size="small">删除</a-button>
@@ -150,7 +151,7 @@ const columns = [
   {
     title: '操作',
     key: 'action',
-    width: 200,
+    width: 250,
     fixed: 'right',
   },
 ]
@@ -163,6 +164,8 @@ const total = ref(0)
 const searchParams = reactive<API.AppQueryRequest>({
   current: 1,
   pageSize: 10,
+  sortField: 'createTime',
+  sortOrder: 'descend',
 })
 
 // 获取数据
@@ -216,6 +219,15 @@ const doSearch = () => {
 // 编辑应用
 const editApp = (app: API.AppVO) => {
   router.push(`/app/edit/${app.id}`)
+}
+
+// 打开应用对话页
+const openAppChat = (app: API.AppVO) => {
+  if (!app.id) {
+    message.warning('应用ID不存在')
+    return
+  }
+  router.push(`/app/chat/${app.id}`)
 }
 
 // 切换精选状态

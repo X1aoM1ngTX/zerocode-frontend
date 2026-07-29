@@ -9,7 +9,11 @@ export default defineConfig({
   base: '/',
   plugins: [
     vue(),
-    vueDevTools(),
+    vueDevTools(
+      {
+      launchEditor: 'E:/Microsoft VS Code/bin/code',
+      }
+    ),
   ],
   resolve: {
     alias: {

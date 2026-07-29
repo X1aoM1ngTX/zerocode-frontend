@@ -75,7 +75,7 @@
                 />
                 <div v-if="message.loading" class="loading-indicator">
                   <a-spin size="small" />
-                  <span>AI 正在生成...</span>
+                  <span>{{ message.toolStatus || 'AI 正在生成...' }}</span>
                 </div>
               </div>
             </div>
@@ -327,6 +327,7 @@ interface Message {
   type: 'user' | 'ai'
   content: string
   loading?: boolean
+  toolStatus?: string
   createTime?: string
 }
 
@@ -562,7 +563,21 @@ const upsertFileNode = (path: string, status = '生成中') => {
 }
 
 const displayMessageContent = (content: string) => {
-  return content.trim()
+  return filterToolLogLines(content).trim()
+}
+
+const filterToolLogLines = (content: string) => {
+  return content
+    .split(/\r?\n/)
+    .filter((line) => {
+      const normalizedLine = line.trim().replace(/^>\s*/, '')
+      return !isToolLogLine(normalizedLine)
+    })
+    .join('\n')
+}
+
+const isToolLogLine = (line: string) => {
+  return /^(正在执行工具|工具执行完成|正在构建|React 项目构建完成|Vue 项目构建完成|预览已更新)(：|:|$)/.test(line)
 }
 
 // 部署相关
@@ -906,11 +921,12 @@ const processGenerationEvent = (event: GenerationEvent, aiMessageIndex: number) 
       appendAiMessage(aiMessageIndex, event.content || '')
       break
     case 'tool_call':
-      appendToolMessage(aiMessageIndex, event.message || event.content || '')
+      updateToolStatus(aiMessageIndex, event.message || event.content || '正在执行工具')
       break
     case 'file_start':
       if (event.path) {
         upsertFileNode(event.path, '生成中')
+        updateToolStatus(aiMessageIndex, `正在生成文件：${event.path}`)
         activeFilePath.value = event.path
         activeWorkspaceTab.value = 'code'
         scrollCodeToBottom()
@@ -931,16 +947,18 @@ const processGenerationEvent = (event: GenerationEvent, aiMessageIndex: number) 
       if (event.path) {
         upsertFileNode(event.path, '已生成')
         fileStatus[event.path] = '已生成'
+        updateToolStatus(aiMessageIndex, `文件生成完成：${event.path}`)
       }
       break
     case 'build_status':
       buildStatus.value = normalizeBuildStatus(event.status)
       buildMessage.value = event.message || event.content || ''
-      appendToolMessage(aiMessageIndex, buildMessage.value)
+      updateToolStatus(aiMessageIndex, buildMessage.value)
       break
     case 'preview_ready':
       buildStatus.value = 'success'
       buildMessage.value = event.message || event.content || '预览已更新'
+      updateToolStatus(aiMessageIndex, buildMessage.value)
       updatePreview()
       loadFileTree()
       activeWorkspaceTab.value = 'preview'
@@ -948,10 +966,11 @@ const processGenerationEvent = (event: GenerationEvent, aiMessageIndex: number) 
     case 'generation_error':
       buildStatus.value = 'error'
       appendToolMessage(aiMessageIndex, event.message || event.content || '生成过程中出现错误')
+      messages.value[aiMessageIndex].loading = false
+      isGenerating.value = false
       message.error(event.message || event.content || '生成过程中出现错误')
       break
   }
-  messages.value[aiMessageIndex].loading = false
   scrollToBottom()
 }
 
@@ -963,6 +982,11 @@ const appendAiMessage = (aiMessageIndex: number, content: string) => {
 const appendToolMessage = (aiMessageIndex: number, content: string) => {
   if (!content) return
   messages.value[aiMessageIndex].content += `\n\n> ${content}\n`
+}
+
+const updateToolStatus = (aiMessageIndex: number, content: string) => {
+  if (!content) return
+  messages.value[aiMessageIndex].toolStatus = content.replace(/^>+\s*/, '').trim()
 }
 
 const normalizeBuildStatus = (status?: string) => {
@@ -1423,6 +1447,8 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #4169ff 0%, #254ff0 100%);
   color: #ffffff;
   border-bottom-right-radius: 3px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .ai-message .message-content {

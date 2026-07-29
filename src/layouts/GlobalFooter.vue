@@ -17,7 +17,7 @@
         <span class="divider">|</span>
         <span class="icp-number">
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
-            粤ICP备2025471762号-1
+            粤ICP备2025471762号-2
           </a>
         </span>
       </div>

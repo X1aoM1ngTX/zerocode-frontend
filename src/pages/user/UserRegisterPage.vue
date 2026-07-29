@@ -12,7 +12,7 @@
       >
         <a-form-item
           name="userAccount"
-          label="邮箱地址"
+          label="账号"
           :rules="[
             { required: true, message: '请输入账号' },
             { min: 4, message: '账号长度不能小于 4 位' },
@@ -20,7 +20,7 @@
             { pattern: /^[a-zA-Z0-9_]+$/, message: '账号只能包含字母、数字和下划线' },
           ]"
         >
-          <a-input v-model:value="formState.userAccount" placeholder="admin@vexor.com" size="large" allow-clear />
+          <a-input v-model:value="formState.userAccount" placeholder="请输入账号" size="large" allow-clear />
         </a-form-item>
 
         <a-form-item
