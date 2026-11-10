@@ -1,316 +1,271 @@
+![Vexor](docs/images/logo.webp)
+
 # Vexor Frontend
 
-Vexor 前端项目，基于 Vue 3 + TypeScript + Vite 构建的现代化前端应用，为零代码开发平台提供用户界面和交互体验。
+**Vexor 零代码应用生成平台的前端：对话式生成、实时预览、源码查看与可视化管理。**
+
+[![Vue](https://img.shields.io/badge/Vue-3.5-42b883?logo=vuedotjs&logoColor=white)](https://vuejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vite.dev)
+[![Ant Design Vue](https://img.shields.io/badge/Ant%20Design%20Vue-4.2-1677FF?logo=antdesign&logoColor=white)](https://antdv.com)
+
+> [后端仓库](https://github.com/X1aoM1ngTX/zerocode-backend)
+
+![Vexor 首页](docs/images/screenshots/home.webp)
+
+## 目录
+
+- [项目简介](#项目简介)
+- [界面预览](#界面预览)
+- [技术栈](#技术栈)
+- [项目结构](#项目结构)
+- [快速开始](#快速开始)
+- [可用脚本](#可用脚本)
+- [核心功能](#核心功能)
+- [环境变量](#环境变量)
+- [开发指南](#开发指南)
+- [部署](#部署)
+- [常见问题](#常见问题)
+- [贡献指南](#贡献指南)
+- [许可证](#许可证)
+
+## 项目简介
+
+Vexor Frontend 是 Vexor 零代码平台的前端应用，使用 Vue 3 + TypeScript + Vite 构建，负责把 AI 代码生成能力包装成完整的创作工作台：
+
+- 在首页用自然语言创建应用，或从模板快速开始
+- 在对话工作台中通过 SSE 观看 AI 实时生成，并在右侧 iframe 预览结果
+- 在预览区开启可视化编辑，点选页面元素后直接描述修改
+- 在源码工作区浏览生成项目的文件树与代码
+- 管理自己的作品、浏览精选案例、生成 AI 图像
+- 管理员可以在后台管理用户、应用和对话
+
+## 界面预览
+
+| 首页 · 一句话开始创建 | 登录 · 会话式认证 |
+| :---: | :---: |
+| [![首页](docs/images/screenshots/thumbs/home.webp)](docs/images/screenshots/home.webp) | [![登录页](docs/images/screenshots/thumbs/login.webp)](docs/images/screenshots/login.webp) |
+| 输入需求或选择模板，一键创建应用 | 登录后由后端 Spring Session 维持会话 |
+| **精选案例 · 社区作品** | **我的作品 · 应用管理** |
+| [![精选案例](docs/images/screenshots/thumbs/featured.webp)](docs/images/screenshots/featured.webp) | [![我的作品](docs/images/screenshots/thumbs/works.webp)](docs/images/screenshots/works.webp) |
+| 浏览精选应用，复制灵感 | 分页查看、继续对话或打开已部署作品 |
+| **对话生成 · SSE + 实时预览** | **源码工作区 · 文件树 + 高亮** |
+| [![对话生成与实时预览](docs/images/screenshots/thumbs/chat-preview.webp)](docs/images/screenshots/chat-preview.webp) | [![源码工作区](docs/images/screenshots/thumbs/chat-code.webp)](docs/images/screenshots/chat-code.webp) |
+| 左侧对话，右侧实时预览与部署入口 | 查看生成项目的完整目录结构与源码 |
+| **可视化编辑 · 点选元素** | **AI 文生图 · 提示词与参数** |
+| [![可视化编辑](docs/images/screenshots/thumbs/visual-edit.webp)](docs/images/screenshots/visual-edit.webp) | [![AI 图像生成](docs/images/screenshots/thumbs/image-gen.webp)](docs/images/screenshots/image-gen.webp) |
+| 在预览中选中元素，让 AI 精准修改 | 正负提示词、分辨率、随机种子与智能改写 |
 
 ## 技术栈
 
-- **框架**: Vue 3.5.17
-- **构建工具**: Vite 7.0.0
-- **UI 库**: Ant Design Vue 4.2.6
-- **状态管理**: Pinia 3.0.3
-- **路由**: Vue Router 4.5.1
-- **HTTP 客户端**: Axios 1.13.2
-- **语言**: TypeScript
-- **代码规范**: ESLint + Prettier
-- **Markdown 渲染**: markdown-it
-- **代码高亮**: highlight.js 11.11.1
+| 分类 | 技术 |
+| --- | --- |
+| 框架 | Vue 3.5（Composition API + `<script setup>`） |
+| 语言 | TypeScript ~5.8 |
+| 构建 | Vite 7 |
+| UI | Ant Design Vue 4.2.6 |
+| 状态 | Pinia 3.0.3 |
+| 路由 | Vue Router 4.5.1（history 模式） |
+| HTTP | Axios 1.13.2 |
+| Markdown / 高亮 | markdown-it 14 · highlight.js 11.11 |
+| 其他 | dayjs · nprogress · material-icon-theme |
+| 规范 | ESLint 9 · Prettier 3.5 |
+| 类型生成 | @umijs/openapi（`npm run generate-api`） |
 
 ## 项目结构
 
-```
+```text
 src/
-├── api/                   # API 接口
-│   ├── app.ts            # 应用相关接口
-│   ├── health.ts         # 健康检查接口
-│   ├── index.ts          # API 入口文件
-│   ├── typings.d.ts      # 类型定义
-│   └── user.ts           # 用户相关接口
-├── assets/               # 静态资源
-│   └── vexor-v2.png   # 项目图标
-├── components/           # 通用组件
-│   ├── AppCard.vue       # 应用卡片组件
-│   ├── AppDetailModal.vue # 应用详情弹窗
-│   ├── DeploySuccessModal.vue # 部署成功弹窗
-│   ├── GlobalHeader.vue  # 全局头部
-│   ├── GlobalFooter.vue  # 全局底部
-│   ├── UserInfo.vue      # 用户信息组件
-│   └── MarkdownRenderer.vue # Markdown渲染器
-├── layouts/              # 布局组件
-│   └── BasicLayout.vue   # 基础布局
-├── pages/                # 页面组件
-│   ├── admin/            # 管理员页面
-│   │   ├── AppManagePage.vue # 应用管理
-│   │   └── UserManagePage.vue # 用户管理
-│   ├── app/              # 应用相关页面
-│   │   ├── AppChatPage.vue # AI对话页面
-│   │   └── AppEditPage.vue # 应用编辑页面
-│   ├── user/             # 用户相关页面
-│   │   ├── UserLoginPage.vue # 登录页面
-│   │   ├── UserRegisterPage.vue # 注册页面
-│   │   └── UserProfilePage.vue # 用户资料
-│   └── HomePage.vue      # 首页
-├── config/               # 配置文件
-│   ├── env.ts            # 环境配置
-│   └── env.example.ts    # 环境配置示例
-├── request/              # 请求封装
-│   └── index.ts          # Axios 配置
-├── router/               # 路由配置
-│   └── index.ts          # 路由定义
-├── stores/               # Pinia 状态管理
-│   ├── counter.ts        # 计数器示例
-│   └── user.ts           # 用户状态管理
-├── utils/                # 工具函数
-│   ├── codeGenTypes.ts   # 代码生成类型定义
-│   └── time.ts           # 时间处理工具
-├── App.vue               # 根组件
-├── main.ts               # 应用入口
-├── env.d.ts              # 环境类型定义
-└── assets/               # 静态资源
+├── access/                  # 权限枚举、checkAccess 与全局访问守卫
+├── api/                     # 接口封装（app / user / chatHistory / image / static / health）
+│   ├── typings.d.ts         # 由 OpenAPI 规范生成的类型
+│   └── index.ts
+├── assets/                  # Logo 与静态图片
+├── components/              # 通用组件
+│   ├── auth/                #   AuthCard 登录/注册卡片
+│   ├── common/              #   EmptyState / PageLoader / ParticleSystem / SkeletonLoader
+│   ├── gallery/             #   AppGallery 应用画廊
+│   ├── AppCard.vue          #   应用卡片
+│   ├── AppDetailModal.vue   #   应用详情弹窗
+│   ├── AppFileTreeNode.vue  #   源码工作区文件树
+│   ├── DeploySuccessModal.vue
+│   ├── MarkdownRenderer.vue #   AI 流式 Markdown 渲染
+│   └── UserInfo.vue
+├── composables/             # useCopy / useDebounce / useErrorHandler / useLoading / usePermission
+├── config/                  # 环境变量读取（env.ts / env.example.ts）
+├── layouts/                 # BasicLayout / GlobalHeader / GlobalFooter
+├── pages/
+│   ├── admin/               # 用户 / 应用 / 对话管理
+│   ├── app/                 # AppChatPage 工作台 · AppEditPage 应用信息
+│   ├── error/               # 404
+│   ├── user/                # 登录 / 注册 / 重置密码 / 个人中心
+│   ├── FeaturedPage.vue
+│   ├── HomePage.vue
+│   ├── ImageGenPage.vue
+│   └── WorksPage.vue
+├── request/                 # Axios 实例、拦截器与请求方法
+├── router/
+│   ├── index.ts             # 路由表（懒加载 + meta）
+│   └── guards.ts            # 页面标题与 NProgress
+├── stores/                  # Pinia：loginUser
+├── styles/                  # 全局样式与 CSS 变量
+├── types/                   # 类型声明
+├── utils/                   # codeGenTypes / visualEditor / logger / time
+├── App.vue
+└── main.ts
 ```
+
+> 访问权限由 `src/access/index.ts` 中的全局 `beforeEach` 统一处理，`src/router/guards.ts` 只负责页面标题与顶部加载条。
 
 ## 快速开始
 
 ### 环境要求
 
 - Node.js 22+
-- npm 或 yarn
+- npm（或 pnpm / yarn）
+- 已启动的 Vexor 后端（默认 `http://localhost:8123`）
 
-### 安装依赖
+### 安装与启动
 
 ```bash
 npm install
-```
-
-### 开发服务器
-
-```bash
 npm run dev
 ```
 
-访问 http://localhost:5173 查看应用
+访问 <http://localhost:5173>。Vite 开发服务器已将 `/api` 代理到 `http://localhost:8123`，无需额外配置跨域。
 
-### 构建生产版本
-
-```bash
-npm run build
-```
-
-### 预览生产构建
-
-```bash
-npm run preview
-```
+后端启动与配置见 [后端 README](https://github.com/X1aoM1ngTX/zerocode-backend#快速开始)。
 
 ## 可用脚本
 
-- `npm run dev` - 启动开发服务器
-- `npm run build` - 构建生产版本
-- `npm run preview` - 预览生产构建
-- `npm run type-check` - 类型检查
-- `npm run lint` - 代码检查和修复
-- `npm run format` - 代码格式化
-- `npm run generate-api` - 生成 API 类型定义
+| 命令 | 说明 |
+| --- | --- |
+| `npm run dev` | 启动 Vite 开发服务器 |
+| `npm run build` | 类型检查 + 生产构建 |
+| `npm run build-only` | 仅生产构建（跳过类型检查） |
+| `npm run preview` | 本地预览生产构建产物 |
+| `npm run type-check` | `vue-tsc` 类型检查 |
+| `npm run lint` | ESLint 检查并自动修复 |
+| `npm run format` | Prettier 格式化 `src/` |
+| `npm run generate-api` | 从后端 OpenAPI 文档生成 TypeScript 类型 |
 
 ## 核心功能
 
-### 1. 用户认证与授权
+### 1. 对话式 AI 生成
 
-- 用户注册和登录功能
-- JWT Token 管理
-- 路由守卫保护
-- 用户角色权限管理（普通用户/管理员）
+`AppChatPage` 通过 `EventSource` 连接后端 `/api/app/chat/gen/code/v2`，实时处理以下事件：
 
-### 2. AI 代码生成界面
+- AI 文本增量：交给 `MarkdownRenderer` 做流式 Markdown 渲染与代码高亮
+- 工具调用：展示 `writeFile`、`modifyFile` 等工具的请求与执行结果
+- 预览就绪：生成完成后自动刷新 iframe，展示最新页面
+- 生成结束：恢复输入框，刷新文件树与历史消息
 
-- 直观的对话式界面，支持自然语言描述
-- 实时流式响应展示 AI 生成过程
-- 支持多种代码生成类型（HTML、Vue 项目等）
-- 代码高亮显示和 Markdown 渲染
+页面同时维护聊天历史分页加载、生成状态与部署入口。
 
-### 3. 应用管理
+### 2. 实时预览与可视化编辑
 
-- 创建、编辑、删除应用
-- 应用列表展示和搜索
-- 应用详情查看
-- 应用代码预览和下载
-- 应用部署状态跟踪
+- 预览地址由 `getStaticPreviewUrl(codeGenType, appId)` 生成，Vue / React 工程会指向 `dist/index.html`
+- 点击「编辑模式」后，`src/utils/visualEditor.ts` 会向 iframe 注入悬浮与选中逻辑
+- 选中元素后，页面把标签、选择器、文本内容、页面路径等上下文附加到下一条用户消息，AI 可以更精准地修改对应区域
+- 修改完成后，预览 iframe 自动刷新
 
-### 4. 管理员功能
+### 3. 源码工作区
 
-- 用户管理：查看、编辑、删除用户
-- 应用管理：审核、管理所有用户的应用
-- 系统监控和统计数据查看
+对话页的「代码」标签页由 `AppFileTreeNode` 渲染生成项目的文件树，右侧使用 highlight.js 展示带行号的源码。工作区用于**查看**生成结果；代码修改通过对话完成，应用信息编辑页则用于维护名称、封面、优先级等元数据。
 
-### 5. 响应式设计
+### 4. 应用与后台管理
 
-- 基于 Ant Design Vue 的现代化 UI
-- 支持桌面端和移动端
-- 优雅的动画效果和交互反馈
+- 首页：创建应用、优化提示词、快速模板
+- 我的作品：分页查看自己创建的应用，支持继续对话与打开已部署作品
+- 精选案例：浏览管理员设置为精选的应用
+- 应用详情：查看应用信息、部署状态与访问入口
+- 管理后台：用户管理、应用管理、对话管理，支持检索、精选设置与删除
 
-### 6. API 接口管理
+| 用户管理（管理员） | 应用管理（管理员） |
+| :---: | :---: |
+| [![用户管理](docs/images/screenshots/thumbs/admin-users.webp)](docs/images/screenshots/admin-users.webp) | [![应用管理](docs/images/screenshots/thumbs/admin-apps.webp)](docs/images/screenshots/admin-apps.webp) |
 
-项目使用 Axios 进行 HTTP 请求，并在 `src/request/index.ts` 中进行了统一配置：
+### 5. AI 图像生成
 
-```typescript
-// 请求拦截器
-request.interceptors.request.use(
-  (config) => {
-    // 添加认证信息等
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  },
-)
+`ImageGenPage` 提供正向/负向提示词、分辨率、随机种子和智能提示词改写，调用后端 `/api/image/generate`，由 DashScope 文生图模型返回图片。
 
-// 响应拦截器
-request.interceptors.response.use(
-  (response) => {
-    // 统一处理响应数据
-    return response.data
-  },
-  (error) => {
-    // 统一错误处理
-    return Promise.reject(error)
-  },
-)
-```
+### 6. 登录、权限与路由
 
-### 7. 路由配置
+- `src/stores/loginUser.ts` 在应用启动时调用 `/api/user/get/login` 自动恢复登录态
+- `src/access/index.ts` 在全局前置守卫中读取 `route.meta.access`：
+  - 未登录访问受保护页面 → 跳转登录页并携带 `redirect`
+  - 已登录但权限不足 → 路由守卫拦截，不会进入管理页面
+- `src/composables/usePermission.ts` 提供组件内的 `isAdmin`、`hasPermission` 等判断
+- 顶部导航根据权限过滤菜单项
 
-使用 Vue Router 进行页面路由管理，配置文件位于 `src/router/index.ts`：
+### 7. API 类型自动生成
 
-```typescript
-import { createRouter, createWebHistory } from 'vue-router'
-import type { RouteRecordRaw } from 'vue-router'
-
-const routes: Array<RouteRecordRaw> = [
-  {
-    path: '/',
-    name: 'HomePage',
-    component: () => import('@/pages/HomePage.vue'),
-  },
-  // 更多路由配置...
-]
-
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-})
-
-export default router
-```
-
-### 8. 状态管理
-
-使用 Pinia 进行状态管理，主要包括：
-
-- `user.ts` - 用户登录状态和信息
-- `counter.ts` - 计数器示例
-
-### 9. 组件复用
-
-项目提供了多个可复用的组件：
-
-- `BasicLayout.vue` - 基础页面布局
-- `GlobalHeader.vue` - 全局头部组件，包含导航和用户信息
-- `GlobalFooter.vue` - 全局页脚组件
-- `AppCard.vue` - 应用卡片展示组件
-- `AppDetailModal.vue` - 应用详情弹窗
-- `MarkdownRenderer.vue` - Markdown 渲染组件
-
-## 开发指南
-
-### 添加新页面
-
-1. 在 `src/pages/` 目录下创建页面组件
-2. 在 `src/router/index.ts` 中添加路由配置
-3. 如需在导航中显示，更新 `GlobalHeader.vue`
-
-### 添加 API 接口
-
-1. 在 `src/api/` 目录下创建接口文件
-2. 使用 TypeScript 定义接口类型
-3. 在组件中导入并使用
-
-### 使用 Ant Design Vue
-
-```vue
-<template>
-  <a-button type="primary" @click="handleClick"> 点击按钮 </a-button>
-  <a-modal v-model:open="visible" title="标题">
-    <p>模态框内容</p>
-  </a-modal>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
-
-const visible = ref(false)
-
-const handleClick = () => {
-  visible.value = true
-}
-</script>
-```
-
-### 代码规范
-
-项目使用 ESLint 和 Prettier 进行代码规范检查：
-
-- 运行 `npm run lint` 检查代码
-- 运行 `npm run format` 格式化代码
-
-## 配置说明
-
-### Vite 配置
-
-主要配置文件 `vite.config.ts`：
-
-- 开发服务器配置
-- 构建优化配置
-- 插件配置
-
-### TypeScript 配置
-
-- `tsconfig.json` - TypeScript 编译配置
-- `tsconfig.app.json` - 应用特定配置
-- `tsconfig.node.json` - Node.js 环境配置
-
-### 环境变量
-
-在项目根目录创建环境变量文件：
-
-- `.env` - 默认环境变量
-- `.env.development` - 开发环境变量
-- `.env.production` - 生产环境变量
-
-## API 类型生成
-
-项目支持从 OpenAPI 规范自动生成 TypeScript 类型定义：
+后端启动后：
 
 ```bash
 npm run generate-api
 ```
 
-配置文件 `openapi2ts.config.ts`：
+配置位于 `openapi2ts.config.ts`，默认读取 `http://localhost:8123/api/v3/api-docs`，输出到 `src/api/typings.d.ts`。新增接口时先重新生成类型，再在 `src/api/` 中封装请求函数。
 
-```typescript
-export default {
-  schema: 'http://localhost:8123/api/v3/api-docs',
-  output: './src/api/typings.ts',
-}
+## 环境变量
+
+参考 `src/config/env.example.ts`，在项目根目录创建 `.env.local`（开发）或 `.env.production`（生产）：
+
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `/api` | API 基础路径；开发环境走 Vite 代理 |
+| `VITE_DEPLOY_DOMAIN` | `http://localhost` | 部署应用访问域名，用于拼接部署链接 |
+
+```bash
+# .env.local 示例
+VITE_DEPLOY_DOMAIN=http://localhost
+VITE_API_BASE_URL=/api
 ```
+
+> Vite 只会注入以 `VITE_` 开头的变量；修改 `.env.*` 后需重启开发服务器。
+
+## 开发指南
+
+### 添加新页面
+
+1. 在 `src/pages/` 下创建 `<script setup lang="ts">` 组件
+2. 在 `src/router/index.ts` 中添加懒加载路由与 `meta`
+3. 需要登录/管理员权限时设置 `meta.access`，访问守卫会自动拦截
+4. 需要隐藏页脚或全屏布局时使用 `meta.hideFooter` / `meta.fullscreen`
+
+### 添加 API 接口
+
+1. 启动后端并运行 `npm run generate-api`
+2. 在 `src/api/` 中基于生成的类型封装请求
+3. 统一从 `src/request/` 导入 Axios 实例，使用 `useErrorHandler` 处理业务错误提示
+
+### 权限与登录态
+
+```ts
+import { usePermission } from '@/composables'
+
+const { isAdmin, hasPermission } = usePermission()
+```
+
+路由级权限通过 `meta.access` 声明，不要在页面内重复做跳转判断。
+
+### 代码风格
+
+- 组件与页面文件使用 PascalCase；`composables`、`utils` 使用 camelCase
+- 使用 Composition API 与 `<script setup>`
+- 提交前运行 `npm run type-check` 与 `npm run lint`
+- API 响应类型统一来自 `src/api/typings.d.ts`
 
 ## 部署
 
-### 构建生产版本
+### 构建
 
 ```bash
 npm run build
 ```
 
-构建产物将输出到 `dist/` 目录，可以部署到任何静态文件服务器。
+产物输出到 `dist/`。构建阶段会执行 `vue-tsc` 类型检查，CI 中也可先单独运行 `npm run type-check`。
 
 ### Nginx 配置示例
 
@@ -329,46 +284,32 @@ server {
         proxy_pass http://localhost:8123;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        # SSE 流式生成必须关闭缓冲
+        proxy_buffering off;
+        proxy_read_timeout 300s;
     }
 }
 ```
 
+> 如果前后端分开部署，请在构建前把 `VITE_API_BASE_URL` 设置为后端可访问的完整地址，并在后端配置好 CORS。
+
 ## 常见问题
 
-### 开发服务器启动失败
-
-- 检查 Node.js 版本是否符合要求
-- 删除 `node_modules` 和 `package-lock.json` 后重新安装依赖
-- 检查端口是否被占用
-
-### API 请求失败
-
-- 确认后端服务是否正常运行
-- 检查 API 基础路径配置
-- 查看浏览器控制台错误信息
-
-### 构建失败
-
-- 运行 `npm run type-check` 检查类型错误
-- 运行 `npm run lint` 检查代码规范问题
-
-## 推荐开发工具
-
-- **IDE**: VSCode
-- **插件**:
-  - Vue - Official
-  - TypeScript Vue Plugin (Volar)
-  - ESLint
-  - Prettier
+- **开发服务器启动失败**：确认 Node.js ≥ 22；端口被占用时 Vite 会自动尝试下一个端口，也可以调整 `vite.config.ts` 的 `server.port`。
+- **接口 404 / 502**：确认后端已在 `8123` 端口启动；检查 `vite.config.ts` 中的代理目标。
+- **登录后仍跳回登录页**：确认浏览器允许 Cookie，且前端与后端通过同一域名/代理访问。
+- **AI 生成内容不实时刷新**：反向代理必须关闭 SSE 缓冲（`proxy_buffering off`），并适当增大读取超时。
+- **预览区域空白**：确认应用已生成完成、后端静态资源接口可访问；Vue / React 工程还需要 `dist/index.html` 构建产物。
+- **类型检查失败**：先运行 `npm run type-check` 定位具体文件，再运行 `npm run lint` 修复规范问题。
 
 ## 贡献指南
 
 1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
+2. 创建特性分支（`git checkout -b feature/AmazingFeature`）
+3. 提交更改（`git commit -m 'feat: add some AmazingFeature'`）
+4. 推送到分支（`git push origin feature/AmazingFeature`）
 5. 开启 Pull Request
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](../LICENSE) 文件了解详情
+本项目采用 MIT 许可证发布。
